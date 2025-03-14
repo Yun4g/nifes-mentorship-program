@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.active{
+    border: 2px solid rgb(203, 85, 21);
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    line-height: 25px;  
+}
