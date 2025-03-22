@@ -1,34 +1,17 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faLongArrowRight, faBars } from "@fortawesome/free-solid-svg-icons";
 import { Calendar } from "@/components/ui/calendar";
 import { GlobalContext } from "@/component/GlobalStore/GlobalState";
-import axios from "axios";
+
 
 
 
 
 function Overview() {
-  const [mentees, setMentees] = useState([]);
-  const [loading, setLoading] = useState(false);
+ 
 
 
-  useEffect(() => {
-    const fetchMentee = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get("https://reqres.in/api/users");
-        console.log(res.data);
-        setMentees(res.data.data);
-      } catch (error) {
-        console.error("Error fetching mentees:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMentee();
-  }, []);
 
   const { upDatePage, handleToggleState, acceptedMentees } = useContext(GlobalContext)
   const Title = [
@@ -197,53 +180,7 @@ function Overview() {
 
 
       <section className="  rounded-lg   grid  grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-y-5 gap-x-5  mt-12 ">
-        {loading ? (
-          <div>Loading...</div>
-        ) : (
-          mentees.map((mentee) => (
-            <div
-              onClick={() => upDatePage("Explore")}
-              key={mentee.id}
-              className="border-2 rounded-lg  overflow-hidden cursor-pointer w-[99%] h-[420px] bg-white"
-            >
-              <div className="h-3/5">
-                <img
-                  src={mentee.avatar} // Use the avatar from the API
-                  className="h-full w-full object-cover"
-                  alt={mentee.first_name}
-                  loading="lazy"
-                />
-              </div>
-              <div className="h-2/5 flex flex-col gap-2 p-6">
-                <h3 className="text-lg font-bold text-customDarkBlue">
-                  {mentee.first_name} {mentee.last_name}
-                </h3>
-                <p className="flex items-center text-xs text-customDarkBlue font-normal">
-                  <span>
-                    <img
-                      src="/image/tick.png"
-                      className="object-cover h-4 w-4"
-                      alt=""
-                    />
-                  </span>
-                  {mentee.email}
-                </p>
-                <p>4.0/5 (15 Testimonials)</p>
-
-                <div className="flex justify-between items-center flex-wrap gap-2">
-                  <div className="flex gap-1">
-                    <p className="text-xs p-2 rounded-lg bg-slate-200">
-                      Mentee
-                    </p>
-                    <p className="text-xs p-2 rounded-lg bg-slate-200">
-                      Sessions: 21
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
+       
       </section>
 
     </section>

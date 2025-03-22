@@ -1,73 +1,131 @@
-import { GlobalContext } from '@/component/GlobalStore/GlobalState';
-import React, { useContext, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars } from '@fortawesome/free-solid-svg-icons';
+import React, { useState } from 'react';
 
 function Setting() {
-    const { upDatePage, handleToggleState } = useContext(GlobalContext);
-    const [selectedFile, setSelectedFile] = useState(null);
-
-    const handleFileChange = (event) => {
-        setSelectedFile(event.target.files[0]);
-    };
-
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        // Handle form submission logic here, including file upload
-        console.log('Form submitted', selectedFile);
-    };
+    const [activeTab, setActiveTab] = useState('basicDetails');
 
     return (
-        <div className="settings-container p-6 bg-gray-100 rounded-lg shadow-md max-w-2xl mx-auto">
-            <header className="flex p-3 md:p-0 justify-between">
-                <div className="flex flex-col w-full lg:flex-row justify-start items-start lg:items-center gap-4 lg:gap-0 lg:justify-between">
-                    <div className="flex flex-col gap-4">
-                        <h1 className="text-2xl font-medium">Settings</h1>
-                        <p className="text-base font-medium text-slate-600">Easy Communication with everyone</p>
-                    </div>
-                    <div className="flex justify-center gap-4">
-                        <img
-                            onClick={() => upDatePage("Message")}
-                            src="/image/messageIcon.png"
-                            className="md:w-12 h-9 md:h-12 cursor-pointer"
-                            alt="Message Icon"
-                        />
-                        <img
-                            onClick={() => upDatePage("Setting")}
-                            src="/image/settingIcon.png"
-                            className="md:w-12 h-9 md:h-12 cursor-pointer"
-                            alt="Setting Icon"
-                        />
-                    </div>
-                </div>
-                <div onClick={handleToggleState} className="block lg:hidden mt-3">
-                    <button aria-label="Toggle menu">
-                        <FontAwesomeIcon icon={faBars} />
-                    </button>
-                </div>
-            </header>
+        <div className="p-6 ">
+            <div className="flex space-x-4  bg-white py-3 px-3 w-fit rounded-md mb-6">
+                <button
+                    className={`py-2 rounded-lg transition-colors duration-300 px-4 ${activeTab === 'basicDetails' ? 'bg-orange-500 text-white ' : 'bg-white text-black'}`}
+                    onClick={() => setActiveTab('basicDetails')}
+                >
+                    Basic Details
+                </button>
+                <button
+                    className={`py-2 rounded-lg transition-colors duration-300 px-4 ${activeTab === 'mentorPreferences' ? 'bg-orange-500 text-white' : 'bg-white text-black'}`}
+                    onClick={() => setActiveTab('mentorPreferences')}
+                >
+                    Mentor Preferences
+                </button>
+                <button
+                    className={`py-2 rounded-lg transition-colors duration-300 px-4 ${activeTab === 'notifications' ? 'bg-orange-500 text-white' : 'bg-white text-black'}`}
+                    onClick={() => setActiveTab('notifications')}
+                >
+                    Notifications
+                </button>
+                <button
+                    className={`py-2 rounded-lg transition-colors duration-300 px-4 ${activeTab === 'loginAndSecurity' ? 'bg-orange-500 text-white' : 'bg-white text-black'}`}
+                    onClick={() => setActiveTab('loginAndSecurity')}
+                >
+                    Login and Security
+                </button>
+            </div>
 
-            <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="form-group">
-                        <label htmlFor="username" className="block text-sm font-medium text-gray-700">Username:</label>
-                        <input type="text" id="username" name="username" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email:</label>
-                        <input type="email" id="email" name="email" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password:</label>
-                        <input type="password" id="password" name="password" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="profilePicture" className="block text-sm font-medium text-gray-700">Profile Picture:</label>
-                        <input type="file" id="profilePicture" name="profilePicture" className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" onChange={handleFileChange} />
-                    </div>
+            {activeTab === 'basicDetails' && (
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                    <h2 className="text-xl font-bold mb-4">Profile Details</h2>
+                    <form className="grid grid-cols-2 gap-4">
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Full Name</label>
+                            <input type="text" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Mentorship Status</label>
+                            <select className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1">
+                                <option>Cordial/Friendly</option>
+                                {/* ...other options... */}
+                            </select>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Age</label>
+                            <input type="number" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Gender</label>
+                            <select className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1">
+                                <option>Female</option>
+                                
+                            </select>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Mode of Contact</label>
+                            <select className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1">
+                                <option>Virtual</option>
+                              
+                            </select>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Availability</label>
+                            <select className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1">
+                                <option>Available ASAP</option>
+                                
+                            </select>
+                        </div>
+                        <div className="col-span-2 mb-4">
+                            <label className="block text-gray-700">Bio</label>
+                            <textarea className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1"></textarea>
+                        </div>
+                        <div className="col-span-2">
+                            <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded">Save Changes</button>
+                        </div>
+                    </form>
                 </div>
-                <button type="submit" className="w-full py-2 px-4 bg-customOrange text-white font-semibold rounded-md shadow-sm focus:outline-none mt-4">Save Changes</button>
-            </form>
+            )}
+
+            {activeTab === 'mentorPreferences' && (
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                    <h2 className="text-xl font-bold mb-4">Mentor Preferences</h2>
+                    <form>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Preferred Mentor</label>
+                            <input type="text" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" />
+                        </div>
+                        <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded">Save Changes</button>
+                    </form>
+                </div>
+            )}
+
+            {activeTab === 'notifications' && (
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                    <h2 className="text-xl font-bold mb-4">Notifications</h2>
+                    <form>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Email Notifications</label>
+                            <input type="checkbox" className="mr-2" />
+                            Enable email notifications
+                        </div>
+                        <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded">Save Changes</button>
+                    </form>
+                </div>
+            )}
+
+            {activeTab === 'loginAndSecurity' && (
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                    <h2 className="text-xl font-bold mb-4">Login and Security</h2>
+                    <form>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Password</label>
+                            <input type="password" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Confirm Password</label>
+                            <input type="password" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" />
+                        </div>
+                        <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded">Save Changes</button>
+                    </form>
+                </div>
+            )}
         </div>
     );
 }

@@ -9,7 +9,7 @@ import { GlobalContext } from '@/component/GlobalStore/GlobalState';
 
 const Profile = () => {
   const [isEditProfileVisible, setEditProfileVisible] = useState(false);
-  const { upDatePage, handleToggleState } = useContext(GlobalContext);
+  const { upDatePage, handleToggleState, acceptedMentees } = useContext(GlobalContext);
   const [profile, setProfile] = useState({
     name: "",
     role: "",
@@ -87,7 +87,11 @@ const Profile = () => {
         <div className="flex flex-col w-full lg:flex-row justify-start items-start lg:items-center gap-4 lg:gap-0 lg:justify-between">
           <div className="flex flex-col gap-4">
             <h1 className="text-2xl font-medium">My profile</h1>
-            <p className="text-base font-medium text-slate-600">Easy Communication with everyone</p>
+            <p className="text-base font-medium text-slate-600">
+            {acceptedMentees && acceptedMentees.length > 0 
+              ? `You have ${acceptedMentees.length} upcoming session${acceptedMentees.length > 1 ? 's' : ''}`
+              : 'You have no upcoming sessions'}
+          </p>
           </div>
           <div className="flex justify-center gap-4">
             <img
