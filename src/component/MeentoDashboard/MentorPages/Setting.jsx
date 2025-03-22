@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"; 
+
 
 function Setting() {
     const [activeTab, setActiveTab] = useState('basicDetails');
 
     return (
-        <div className="p-6 ">
-            <div className="flex space-x-4  bg-white py-3 px-3 w-fit rounded-md mb-6">
+        <div className="p-6">
+            <div className="flex flex-wrap space-x-4 bg-white py-3 px-3 w-full md:w-fit rounded-md mb-6">
                 <button
                     className={`py-2 rounded-lg transition-colors duration-300 px-4 ${activeTab === 'basicDetails' ? 'bg-orange-500 text-white ' : 'bg-white text-black'}`}
                     onClick={() => setActiveTab('basicDetails')}
@@ -22,7 +30,7 @@ function Setting() {
                     className={`py-2 rounded-lg transition-colors duration-300 px-4 ${activeTab === 'notifications' ? 'bg-orange-500 text-white' : 'bg-white text-black'}`}
                     onClick={() => setActiveTab('notifications')}
                 >
-                    Notifications
+                    Social media link
                 </button>
                 <button
                     className={`py-2 rounded-lg transition-colors duration-300 px-4 ${activeTab === 'loginAndSecurity' ? 'bg-orange-500 text-white' : 'bg-white text-black'}`}
@@ -35,17 +43,21 @@ function Setting() {
             {activeTab === 'basicDetails' && (
                 <div className="bg-white p-6 rounded-lg shadow-md">
                     <h2 className="text-xl font-bold mb-4">Profile Details</h2>
-                    <form className="grid grid-cols-2 gap-4">
+                    <form className="grid grid-cols-1 md:grid-cols-2 items-center gap-4">
                         <div className="mb-4">
                             <label className="block text-gray-700">Full Name</label>
                             <input type="text" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" />
                         </div>
                         <div className="mb-4">
-                            <label className="block text-gray-700">Mentorship Status</label>
-                            <select className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1">
-                                <option>Cordial/Friendly</option>
-                                {/* ...other options... */}
-                            </select>
+                            <label className="block text-gray-700 ">Mentorship Status</label>
+                            <Select className="h-full rounded-xl p-2">
+                                <SelectTrigger className="outline-none w-full border-2 rounded-xl h-[60px]">
+                                    <SelectValue className="text-lg text-slate-500" placeholder="Select One" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Cordial/Friendly">Cordial/Friendly</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div className="mb-4">
                             <label className="block text-gray-700">Age</label>
@@ -53,30 +65,44 @@ function Setting() {
                         </div>
                         <div className="mb-4">
                             <label className="block text-gray-700">Gender</label>
-                            <select className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1">
-                                <option>Female</option>
-                                
-                            </select>
+                            <Select className="p-2">
+                                <SelectTrigger className="outline-none w-full border-2 rounded-xl h-[60px]">
+                                    <SelectValue className="text-lg text-slate-500" placeholder="Select One" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Female">Female</SelectItem>
+                                    <SelectItem value="male">male</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div className="mb-4">
                             <label className="block text-gray-700">Mode of Contact</label>
-                            <select className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1">
-                                <option>Virtual</option>
-                              
-                            </select>
+                            <Select className="h-full">
+                                <SelectTrigger className="outline-none w-full border-2 rounded-xl h-[60px]">
+                                    <SelectValue className="text-lg text-slate-500" placeholder="Select One" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Virtual">Virtual</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div className="mb-4">
                             <label className="block text-gray-700">Availability</label>
-                            <select className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1">
-                                <option>Available ASAP</option>
-                                
-                            </select>
+                            <Select className="h-full">
+                                <SelectTrigger className="outline-none w-full border-2 rounded-xl h-[60px]">
+                                    <SelectValue className="text-lg text-slate-500" placeholder="Select One" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Available ASAP">Available ASAP</SelectItem>
+                                    <SelectItem value="In a few weeks">In a few weeks</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
-                        <div className="col-span-2 mb-4">
+                        <div className="col-span-1 md:col-span-2 mb-4">
                             <label className="block text-gray-700">Bio</label>
                             <textarea className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1"></textarea>
                         </div>
-                        <div className="col-span-2">
+                        <div className="col-span-1 md:col-span-2">
                             <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded">Save Changes</button>
                         </div>
                     </form>
@@ -98,14 +124,31 @@ function Setting() {
 
             {activeTab === 'notifications' && (
                 <div className="bg-white p-6 rounded-lg shadow-md">
-                    <h2 className="text-xl font-bold mb-4">Notifications</h2>
-                    <form>
+                    <h2 className="text-xl font-bold mb-4">Social Media</h2>
+                    <form className="grid grid-cols-1 md:grid-cols-2 items-center gap-4">
                         <div className="mb-4">
-                            <label className="block text-gray-700">Email Notifications</label>
-                            <input type="checkbox" className="mr-2" />
-                            Enable email notifications
+                            <label className="block text-gray-700">Twitter</label>
+                            <input type="text" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" placeholder="Twitter Handle" />
                         </div>
-                        <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded">Save Changes</button>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Facebook</label>
+                            <input type="text" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" placeholder="Facebook Profile" />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">WhatsApp</label>
+                            <input type="text" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" placeholder="WhatsApp Number" />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Instagram</label>
+                            <input type="text" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" placeholder="Instagram Handle" />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Email</label>
+                            <input type="email" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" placeholder="Email Address" />
+                        </div>
+                        <div className="col-span-1 md:col-span-2">
+                            <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded">Save Changes</button>
+                        </div>
                     </form>
                 </div>
             )}
