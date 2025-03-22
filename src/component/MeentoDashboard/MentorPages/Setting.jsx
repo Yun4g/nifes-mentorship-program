@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBars } from '@fortawesome/free-solid-svg-icons';
 import {
   Select,
   SelectContent,
@@ -6,14 +8,49 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"; 
+import { GlobalContext } from '@/component/GlobalStore/GlobalState';
 
 
 function Setting() {
     const [activeTab, setActiveTab] = useState('basicDetails');
+    const { upDatePage, handleToggleState } = useContext(GlobalContext)
 
     return (
+
+        
         <div className="p-6">
-            <div className="flex flex-wrap space-x-4 bg-white py-3 px-3 w-full md:w-fit rounded-md mb-6">
+               <header className="flex justify-between mb-6">
+                    <div className="flex flex-col w-full lg:flex-row justify-start items-start lg:items-center gap-4 lg:gap-0 lg:justify-between">
+                      <div className="flex flex-col gap-4">
+                        <h1 className="text-[32px] font-medium">Settings</h1>
+                        <p className="text-base font-medium text-slate-600">Make your Changes</p>
+                      </div>
+            
+                      <div className="flex justify-center gap-4">
+                        <img
+                          onClick={() => upDatePage("Message")}
+                          src="/image/messageIcon.png"
+                          className="md:w-12 h-9 md:h-12 cursor-pointer"
+                          alt="Message Icon"
+                          loading="lazy"
+                        />
+                        <img
+                          onClick={() => upDatePage("Setting")}
+                          src="/image/settingIcon.png"
+                          className="md:w-12 h-9 md:h-12 cursor-pointer"
+                          alt="Setting Icon"
+                          loading="lazy"
+                        />
+                      </div>
+                    </div>
+            
+                    <div onClick={handleToggleState} className="block lg:hidden mt-3">
+                      <button aria-label="Toggle menu">
+                        <FontAwesomeIcon icon={faBars} />
+                      </button>
+                    </div>
+                  </header>
+            <div className="flex flex-wrap justify-start items-center space-x-4 bg-white py-3 px-3 w-full md:w-fit rounded-md mb-6">
                 <button
                     className={`py-2 rounded-lg transition-colors duration-300 px-4 ${activeTab === 'basicDetails' ? 'bg-orange-500 text-white ' : 'bg-white text-black'}`}
                     onClick={() => setActiveTab('basicDetails')}
@@ -27,10 +64,10 @@ function Setting() {
                     Mentor Preferences
                 </button>
                 <button
-                    className={`py-2 rounded-lg transition-colors duration-300 px-4 ${activeTab === 'notifications' ? 'bg-orange-500 text-white' : 'bg-white text-black'}`}
-                    onClick={() => setActiveTab('notifications')}
+                    className={`py-2 rounded-lg transition-colors duration-300 px-4 ${activeTab === 'Social Media' ? 'bg-orange-500 text-white' : 'bg-white text-black'}`}
+                    onClick={() => setActiveTab('Social Media')}
                 >
-                    Social media link
+                    Social Media
                 </button>
                 <button
                     className={`py-2 rounded-lg transition-colors duration-300 px-4 ${activeTab === 'loginAndSecurity' ? 'bg-orange-500 text-white' : 'bg-white text-black'}`}
@@ -39,7 +76,7 @@ function Setting() {
                     Login and Security
                 </button>
             </div>
-
+        
             {activeTab === 'basicDetails' && (
                 <div className="bg-white p-6 rounded-lg shadow-md">
                     <h2 className="text-xl font-bold mb-4">Profile Details</h2>
@@ -51,7 +88,7 @@ function Setting() {
                         <div className="mb-4">
                             <label className="block text-gray-700 ">Mentorship Status</label>
                             <Select className="h-full rounded-xl p-2">
-                                <SelectTrigger className="outline-none w-full border-2 rounded-xl h-[60px]">
+                                <SelectTrigger className="outline-none w-full border-2  rounded-xl h-[60px]">
                                     <SelectValue className="text-lg text-slate-500" placeholder="Select One" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -78,7 +115,7 @@ function Setting() {
                         <div className="mb-4">
                             <label className="block text-gray-700">Mode of Contact</label>
                             <Select className="h-full">
-                                <SelectTrigger className="outline-none w-full border-2 rounded-xl h-[60px]">
+                                <SelectTrigger className="outline-none w-full border-2  rounded-xl h-[60px]">
                                     <SelectValue className="text-lg text-slate-500" placeholder="Select One" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -100,7 +137,7 @@ function Setting() {
                         </div>
                         <div className="col-span-1 md:col-span-2 mb-4">
                             <label className="block text-gray-700">Bio</label>
-                            <textarea className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1"></textarea>
+                            <textarea className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2  mt-1"></textarea>
                         </div>
                         <div className="col-span-1 md:col-span-2">
                             <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded">Save Changes</button>
@@ -115,28 +152,28 @@ function Setting() {
                     <form>
                         <div className="mb-4">
                             <label className="block text-gray-700">Preferred Mentor</label>
-                            <input type="text" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" />
+                            <input type="text" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2  mt-1" />
                         </div>
                         <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded">Save Changes</button>
                     </form>
                 </div>
             )}
 
-            {activeTab === 'notifications' && (
+            {activeTab === 'Social Media' && (
                 <div className="bg-white p-6 rounded-lg shadow-md">
                     <h2 className="text-xl font-bold mb-4">Social Media</h2>
                     <form className="grid grid-cols-1 md:grid-cols-2 items-center gap-4">
                         <div className="mb-4">
                             <label className="block text-gray-700">Twitter</label>
-                            <input type="text" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" placeholder="Twitter Handle" />
+                            <input type="text" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2  mt-1" placeholder="Twitter Handle" />
                         </div>
                         <div className="mb-4">
                             <label className="block text-gray-700">Facebook</label>
-                            <input type="text" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" placeholder="Facebook Profile" />
+                            <input type="text" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2  mt-1" placeholder="Facebook Profile" />
                         </div>
                         <div className="mb-4">
                             <label className="block text-gray-700">WhatsApp</label>
-                            <input type="text" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" placeholder="WhatsApp Number" />
+                            <input type="text" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2  mt-1" placeholder="WhatsApp Number" />
                         </div>
                         <div className="mb-4">
                             <label className="block text-gray-700">Instagram</label>
@@ -144,7 +181,7 @@ function Setting() {
                         </div>
                         <div className="mb-4">
                             <label className="block text-gray-700">Email</label>
-                            <input type="email" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" placeholder="Email Address" />
+                            <input type="email" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2  mt-1" placeholder="Email Address" />
                         </div>
                         <div className="col-span-1 md:col-span-2">
                             <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded">Save Changes</button>
@@ -159,11 +196,11 @@ function Setting() {
                     <form>
                         <div className="mb-4">
                             <label className="block text-gray-700">Password</label>
-                            <input type="password" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" />
+                            <input type="password" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 border-orange-500 mt-1" />
                         </div>
                         <div className="mb-4">
                             <label className="block text-gray-700">Confirm Password</label>
-                            <input type="password" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 mt-1" />
+                            <input type="password" className="flex items-center p-2 md:p-4 gap-3 w-full rounded-xl border-2 border-orange-500 mt-1" />
                         </div>
                         <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded">Save Changes</button>
                     </form>

@@ -178,10 +178,23 @@ function Overview() {
         </div>
       </section>
 
-
-      <section className="  rounded-lg   grid  grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-y-5 gap-x-5  mt-12 ">
-       
-      </section>
+      <div className="bg-white p-6 rounded-lg shadow-md mt-9 mb-6">
+                <h2 className="text-xl font-bold mb-4">Overview</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-orange-100 p-4 rounded-lg text-center">
+                        <h3 className="text-lg font-semibold">Number of Mentees</h3>
+                        <p className="text-2xl font-bold">10</p>
+                    </div>
+                    <div className="bg-orange-100 p-4 rounded-lg text-center">
+                        <h3 className="text-lg font-semibold">Pending Sessions</h3>
+                        <p className="text-2xl font-bold">5</p>
+                    </div>
+                    <div className="bg-orange-100 p-4 rounded-lg text-center">
+                        <h3 className="text-lg font-semibold">Session History</h3>
+                        <p className="text-2xl font-bold">20</p>
+                    </div>
+                </div>
+            </div>
 
     </section>
 
