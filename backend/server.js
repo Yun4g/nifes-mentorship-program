@@ -36,8 +36,19 @@ const io = initializeSocket(httpServer);
 app.set('io', io);
 
 // Middleware
+const allowedOrigins = [
+  'https://leap-on-mentorship-program-xkjq.vercel.app',
+  'https://leapon.onrender.com'
+];
+
 app.use(cors({
-  origin: 'https://leap-on-mentorship-program-xkjq.vercel.app/', // Allow requests from the frontend
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, origin);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true, // Allow cookies and credentials
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
   allowedHeaders: ['Authorization', 'Content-Type']
