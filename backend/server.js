@@ -37,7 +37,7 @@ app.set('io', io);
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5173', // Allow requests from the frontend
+  origin: 'https://leap-on-mentorship-program-xkjq.vercel.app/', // Allow requests from the frontend
   credentials: true, // Allow cookies and credentials
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
   allowedHeaders: ['Authorization', 'Content-Type']
