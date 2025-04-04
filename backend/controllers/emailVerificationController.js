@@ -22,11 +22,8 @@ export const sendVerificationEmailController = async (req, res) => {
     user.verificationTokenExpires = verificationTokenExpires;
     await user.save();
 
-    // Generate verification URL
-    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`;
-
     // Send verification email
-    await sendVerificationEmail(email, verificationUrl);
+    await sendVerificationEmail(email, verificationToken);
 
     res.json({ message: 'Verification email sent successfully' });
   } catch (error) {
@@ -89,4 +86,4 @@ export const checkVerificationStatusController = async (req, res) => {
     console.error('Error checking verification status:', error);
     res.status(500).json({ message: 'Failed to check verification status' });
   }
-};
+}; 
