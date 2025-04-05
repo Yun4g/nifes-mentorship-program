@@ -38,16 +38,15 @@ function StepOne() {
   };
 
   const handleContinue = async () => {
-    if (!imageUrl || !gender) {
-      alert('Please upload a profile picture and select your gender');
+    if (!gender) {
+      alert('Please select your gender');
       return;
     }
 
     try {
-      // Update the backend with profile picture and gender
+      // Update the backend with gender
       const formData = new FormData();
       formData.append('gender', gender);
-      formData.append('profilePicture', imageUrl);
 
       await userApi.updateProfile(formData);
 
