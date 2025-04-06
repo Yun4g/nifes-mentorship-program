@@ -9,7 +9,7 @@ function ResetPassword() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
-  const { forgotPassword } = useAuth();
+  const { ...rest } = useAuth();
 
   const {
     register,

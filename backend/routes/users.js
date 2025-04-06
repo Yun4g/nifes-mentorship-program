@@ -565,7 +565,7 @@ router.put('/update-step-4', auth, async (req, res) => {
   }
 });
 
-// Request password reset
+// Updated the /forgot-password route to send the reset token via email
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
@@ -573,6 +573,7 @@ router.post('/forgot-password', async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
     // Generate reset token
     const resetToken = crypto.randomBytes(32).toString('hex');
     user.resetPasswordToken = crypto
@@ -581,11 +582,24 @@ router.post('/forgot-password', async (req, res) => {
       .digest('hex');
     user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
     await user.save();
-    // TODO: Send email with reset token
-    if (process.env.NODE_ENV === 'development') {
-      res.json({ resetToken });
-    } else {
+
+    // Send email with reset token
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    const message = `You are receiving this email because you (or someone else) has requested a password reset. Please click the link below to reset your password:
+
+${resetUrl}
+
+If you did not request this, please ignore this email.`;
+
+    try {
+      await sendVerificationEmail(email, message);
       res.json({ message: 'Password reset email sent' });
+    } catch (error) {
+      console.error('Error sending email:', error);
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+      await user.save();
+      res.status(500).json({ message: 'Error sending email' });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });

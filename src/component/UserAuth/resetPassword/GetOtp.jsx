@@ -30,9 +30,24 @@ function GetOtp() {
     }
   }, [setValue]);
 
-  const onSubmit = () => {
-    // Handle form submission
-    navigate("/ChangePassword");
+  // Updated to verify OTP with the backend
+  const onSubmit = async (data) => {
+    try {
+      const otp = Object.values(data).join(''); // Combine OTP fields into a single string
+      const response = await fetch('/api/users/verify-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ otp }),
+      });
+      if (!response.ok) {
+        throw new Error('Invalid OTP. Please try again.');
+      }
+      navigate('/ChangePassword');
+    } catch (err) {
+      alert(err.message || 'Failed to verify OTP. Please try again.');
+    }
   };
 
   const handleInputChange = (e, fieldName, nextFieldName) => {

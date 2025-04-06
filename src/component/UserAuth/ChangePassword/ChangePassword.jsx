@@ -32,17 +32,30 @@ function ChangePassword() {
     }));
   };
 
+  // Updated to send the new password to the backend
   const onSubmit = async (data) => {
     try {
       setError('');
       setSuccess('');
-      await changePassword(data.currentPassword, data.newPassword);
-      setSuccess('Password changed successfully');
+      const response = await fetch('/api/users/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: localStorage.getItem('resetToken'), // Retrieve token from localStorage
+          password: data.newPassword,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to reset password. Please try again.');
+      }
+      setSuccess('Password reset successfully');
       setTimeout(() => {
         navigate('/login');
       }, 2000);
     } catch (err) {
-      setError(err.message || 'Failed to change password. Please try again.');
+      setError(err.message || 'Failed to reset password. Please try again.');
     }
   };
 
