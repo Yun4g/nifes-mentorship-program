@@ -35,10 +35,9 @@ function Explore() {
 
   // Log users whenever it changes
   useEffect(() => {
-    console.log('Updated users:', users);
+    console.log("Users state updated:", users);
   }, [users]);
 
-  // Filter users based on search query and acceptedMentees
   const filteredUsers = users
     .filter((item) => !acceptedMentees.some((mentee) => mentee.id === item._id))
     .filter((item) =>
