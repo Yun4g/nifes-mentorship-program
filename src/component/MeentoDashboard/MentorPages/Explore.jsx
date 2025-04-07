@@ -189,6 +189,7 @@ function Explore() {
                   className="w-full h-full object-cover"
                   onError={(e) => e.currentTarget.src = '/image/default-profile.png'} // Fallback to default image
                 />
+                {console.log('Image URL:', userData.profilePicture?.startsWith('http') ? userData.profilePicture : `${import.meta.env.VITE_BACKEND_URL}${userData.profilePicture || '/image/default-profile.png'}`)}
               </div>
 
               {/* User Info */}
