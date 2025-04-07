@@ -22,8 +22,9 @@ function StepOne() {
         formData.append('profilePicture', file);
 
         const response = await userApi.uploadProfilePicture(formData);
-        const uploadedUrl = response.data.imageUrl;
-        console.log('Uploaded image URL:', uploadedUrl);
+        console.log('Full API Response:', response); // Debugging
+        const uploadedUrl = response.data?.imageUrl || ''; // Fallback for undefined
+        console.log('Uploaded image URL:', uploadedUrl); // Debugging
         setImageUrl(uploadedUrl);
       } catch (error) {
         console.error('Error uploading image:', error);
