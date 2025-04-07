@@ -114,10 +114,10 @@ function Explore() {
         <div className="flex flex-col w-full lg:flex-row justify-start items-start lg:items-center gap-4 lg:gap-0 lg:justify-between">
           <div className="flex flex-col gap-4">
             <h1 className="text-[32px] font-medium">
-              Connect with other Users today
+              Connect with Meentors and Mentees
             </h1>
             <p className="text-base font-medium text-slate-600">
-              Connect with other Users today
+              life changing encounters for everyone
             </p>
           </div>
 
