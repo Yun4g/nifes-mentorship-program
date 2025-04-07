@@ -111,13 +111,15 @@ const MenteeProfile = () => {
         <div className="bg-white pb-8 dark:bg-gray-800 rounded-xl shadow-sm">
           <div className="h-48 rounded-t-xl bg-gradient-to-r from-blue-400 to-blue-600 relative" style={{ backgroundImage: 'url(/image/backImage.png)' }}>
             <div className="absolute top-20 left-8 flex items-end">
-              <img
-                src={profile.image || "/image/young-people-working-from-modern-place 1.png"}
-                alt={profile.name}
-                className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800"
-                onError={handleImageError}
-              />
-              {console.log('Profile Image URL:', profile.image )}
+              <div className="relative w-36 h-36 rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-lg">
+                <img
+                  src={profile.image || "/image/young-people-working-from-modern-place 1.png"}
+                  alt={profile.name}
+                  className="w-full h-full object-cover"
+                  onError={handleImageError}
+                />
+              </div>
+              {console.log('Profile Image URL:', profile.image)}
             </div>
           </div>
           <div className="pt-20 px-8">
