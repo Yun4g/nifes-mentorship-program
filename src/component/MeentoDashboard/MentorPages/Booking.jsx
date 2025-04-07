@@ -384,7 +384,7 @@ function Booking() {
           </button>
         </div>
 
-        <section className="w-full bg-white mt-4 p-6 rounded-lg shadow-sm">
+        <section className="w-full h-full overflow-scroll bg-white mt-4 p-6 rounded-lg shadow-sm">
           {displayComponent()}
         </section>
       </main>

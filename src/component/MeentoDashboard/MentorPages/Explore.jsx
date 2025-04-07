@@ -22,7 +22,6 @@ function Explore() {
         const response = await userApi.getAllUsers(); 
         console.log('Fetched users:', response.data); 
         setUsers(response.data);
-        console.log('enter:',users)
       } catch (error) {
         console.error("Error fetching users:", error);
         setError(error.message);
@@ -33,6 +32,11 @@ function Explore() {
 
     fetchUsers();
   }, []);
+
+  // Log users whenever it changes
+  useEffect(() => {
+    console.log('Updated users:', users);
+  }, [users]);
 
   // Filter users based on search query and acceptedMentees
   const filteredUsers = users
