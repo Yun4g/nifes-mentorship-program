@@ -187,18 +187,18 @@ function Explore() {
                   src={
                     userData.profilePicture?.startsWith('http')
                       ? userData.profilePicture
-                      : `${import.meta.env.VITE_BACKEND_URL}${userData.profilePicture || '/image/default-profile.png'}`
+                      : `${import.meta.env.VITE_BACKEND_URL}${userData.profilePicture || '/uploads/profiles/default-profile.png'}`
                   }
                   alt={userData.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     console.error('Image failed to load:', e.currentTarget.src); // Log the failed URL
-                    e.currentTarget.src = '/image/default-profile.png'; // Fallback to default image
+                    e.currentTarget.src = `${import.meta.env.VITE_BACKEND_URL}/uploads/profiles/default-profile.png`; // Fallback to backend default image
                   }}
                 />
                 {console.log('Constructed Image URL:', userData.profilePicture?.startsWith('http')
                   ? userData.profilePicture
-                  : `${import.meta.env.VITE_BACKEND_URL}${userData.profilePicture || '/image/default-profile.png'}`)}
+                  : `${import.meta.env.VITE_BACKEND_URL}${userData.profilePicture || '/uploads/profiles/default-profile.png'}`)}
               </div>
 
               {/* User Info */}
