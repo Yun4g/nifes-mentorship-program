@@ -22,6 +22,8 @@ function StepOne() {
         formData.append('profilePicture', file);
 
         const response = await userApi.uploadProfilePicture(formData);
+        console.log('API Response:', response); // Debugging
+        // Check if response is valid and contains the expected data
         console.log('Full API Response:', response); // Debugging
         const uploadedUrl = response.data?.imageUrl || ''; // Fallback for undefined
         console.log('Uploaded image URL:', uploadedUrl); // Debugging
