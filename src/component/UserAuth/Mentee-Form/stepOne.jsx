@@ -22,12 +22,10 @@ function StepOne() {
         formData.append('profilePicture', file);
 
         const response = await userApi.uploadProfilePicture(formData);
-        console.log('API Response:', response); // Debugging
-        // Check if response is valid and contains the expected data
+        console.log('API Response:', response); 
         console.log('Full API Response:', response); // Debugging
-        const uploadedUrl = response.data?.imageUrl || ''; // Fallback for undefined
-        console.log('Uploaded image URL:', uploadedUrl); // Debugging
-        setImageUrl(uploadedUrl);
+        setImageUrl(response.data.profilePicture);
+        console.log('Image URL:', response.data.profilePicture); // Debugging
       } catch (error) {
         console.error('Error uploading image:', error);
         alert(error.message || 'Failed to upload image. Please try again.');
