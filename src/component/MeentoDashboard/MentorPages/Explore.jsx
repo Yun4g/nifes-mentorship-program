@@ -35,7 +35,7 @@ function Explore() {
 
   // Log users whenever it changes
   useEffect(() => {
-    console.log("Users state updated:", users);
+    console.log('Updated users:', users);
   }, [users]);
 
   const filteredUsers = users
