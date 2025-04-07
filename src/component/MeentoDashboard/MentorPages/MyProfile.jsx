@@ -39,7 +39,8 @@ const Profile = () => {
           'Content-Type': 'application/json'
         }
       });
-
+ console.log(response, 'response');
+      // Check if the response is ok (status in the range 200-299)
       if (!response.ok) {
         throw new Error('Failed to fetch profile data');
       }
@@ -142,15 +143,12 @@ const Profile = () => {
           <div className="bg-white pb-8 dark:bg-gray-800 rounded-xl shadow-sm">
             <div className="h-48 rounded-t-xl bg-gradient-to-r from-blue-400 to-blue-600 relative">
               <div className="absolute -wbottom-16 left-8 flex items-end">
-                <div className="relative w-36 h-36 rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-lg">
-                  <img
-                    src={getImageUrl(profile?.profilePicture)}
-                    alt={`${profile?.firstName || ''} ${profile?.lastName || ''}`}
-                    className="w-full h-full object-cover"
-                    onError={handleImageError}
-                  />
-                </div>
-                {console.log('Profile Image URL:', getImageUrl(profile?.profilePicture))}
+                <img
+                  src={getImageUrl(profile?.profilePicture)}
+                  alt={`${profile?.firstName || ''} ${profile?.lastName || ''}`}
+                  className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800"
+                  onError={handleImageError}
+                />
               </div>
             </div>
             <div className="pt-20 px-8">

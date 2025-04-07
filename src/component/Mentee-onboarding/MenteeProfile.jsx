@@ -115,7 +115,7 @@ const MenteeProfile = () => {
                 <img
                   src={profile.image || "/image/young-people-working-from-modern-place 1.png"}
                   alt={profile.name}
-                  className="w-full h-full object-cover"
+                  className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800"
                   onError={handleImageError}
                 />
               </div>
