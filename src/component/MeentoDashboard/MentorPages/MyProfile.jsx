@@ -162,7 +162,7 @@ const Profile = () => {
                   {profile?.yearOfStudy && <p className="text-gray-600 dark:text-gray-400">{profile.yearOfStudy}</p>}
                   {profile?.gender && <p className="text-gray-600 dark:text-gray-400">{profile.gender}</p>}
                   {profile?.mentorshipStatus && <p className="text-gray-600 dark:text-gray-400">{profile.mentorshipStatus}</p>}
-                  {profile?.bio && <p className="text-gray-600 dark:text-gray-400">{profile.bio}</p>}
+                 
                   <h2 className="text-xl font-bold mb-4 mt-6">Social Media</h2>
                   {renderSocialLinks()}
                 </div>

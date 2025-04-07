@@ -120,10 +120,10 @@ const MenteeProfile = () => {
           <div className="pt-20 px-8">
             <div className="flex justify-between items-start">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{profile.name}</h1>
-                <p className="text-gray-600 dark:text-gray-400">{profile.role}</p>
-                <p className="text-gray-600 dark:text-gray-400">{profile.email}</p>
-                <p className="text-gray-600 dark:text-gray-400">{profile.department}</p>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white"> NAME: {profile.name}</h1>
+                <p className="text-gray-600 dark:text-gray-400"> ROLE: {profile.role}</p>
+                <p className="text-gray-600 dark:text-gray-400"> EMAIL {profile.email}</p>
+                <p className="text-gray-600 dark:text-gray-400">  {profile.department}</p>
                 <p className="text-gray-600 dark:text-gray-400">Year {profile.yearOfStudy}</p>
               </div>
               <button
