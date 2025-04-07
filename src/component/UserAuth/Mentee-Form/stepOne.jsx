@@ -4,7 +4,7 @@ import { userApi } from '@/lib/api';
 
 function StepOne() {
   const { handleIncreament } = useContext(GlobalContext);
-  const [imageUrl, setImageUrl] = useState(null);
+  const [imageUrl, setImageUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [gender, setGender] = useState('');
 
