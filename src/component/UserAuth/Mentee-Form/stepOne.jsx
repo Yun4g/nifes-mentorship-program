@@ -24,7 +24,8 @@ function StepOne() {
         const response = await userApi.uploadProfilePicture(formData);
         console.log('API Response:', response); 
         setImageUrl(response.data.profilePicture); // Set the image URL
-        console.log('Uploaded Image URL:', response.data.profilePicture); // Log the URL directly
+        console.log('Uploaded Image URL:', response.data.profilePicture);
+        console.log(imageUrl) // Log the URL directly
       } catch (error) {
         console.error('Error uploading image:', error);
         alert(error.message || 'Failed to upload image. Please try again.');
