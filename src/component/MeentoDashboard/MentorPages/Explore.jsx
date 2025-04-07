@@ -172,7 +172,7 @@ function Explore() {
         {filteredUsers.length === 0 ? (
           <div className="col-span-full text-center py-12">
             <p className="text-xl text-gray-600 dark:text-gray-400">
-              No users found matching your search
+              No users found matching your search hi
             </p>
           </div>
         ) : (
