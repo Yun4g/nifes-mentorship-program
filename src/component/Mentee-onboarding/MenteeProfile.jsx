@@ -26,6 +26,8 @@ const MenteeProfile = () => {
     yearOfStudy: user?.yearOfStudy || ""
   });
 
+  console.log(user, 'user');
+
   useEffect(() => {
     if (user) {
       setProfile({
