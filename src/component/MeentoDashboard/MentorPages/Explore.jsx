@@ -19,7 +19,7 @@ function Explore() {
       setLoading(true);
       try {
         // Fetch all users regardless of role
-        const response = await userApi.getAllUsers(); // Assuming this endpoint exists in the backend
+        const response = await userApi.getAllUsers(); 
         console.log('Fetched users:', response.data); 
         setUsers(response.data);
         console.log('enter:',users)
