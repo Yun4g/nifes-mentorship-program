@@ -108,7 +108,7 @@ const MenteeProfile = () => {
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="bg-white pb-8 dark:bg-gray-800 rounded-xl shadow-sm">
           <div className="h-48 rounded-t-xl bg-gradient-to-r from-blue-400 to-blue-600 relative" style={{ backgroundImage: 'url(/image/backImage.png)' }}>
-            <div className="absolute -bottom left-8 flex items-end">
+            <div className="absolute top-20 left-8 flex items-end">
               <img
                 src={profile.image || "/image/young-people-working-from-modern-place 1.png"}
                 alt={profile.name}
