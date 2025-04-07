@@ -60,7 +60,7 @@ function StepOne() {
 
   return (
     <div className='text-center lg:text-start w-[300px] lg:w-[400px]'>
-      <p className='text-base font-medium mt-3 lg:mt-6'>STEP 1 of 4</p>
+      <p className='text-base font-medium mt-3 lg:mt-6'>STEP  of 4</p>
 
       {/* Progress Bar */}
       <progress className="progress-bar h-2" value="30" max="100"></progress>
