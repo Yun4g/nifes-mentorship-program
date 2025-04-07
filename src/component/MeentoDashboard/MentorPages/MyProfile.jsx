@@ -148,6 +148,7 @@ const Profile = () => {
                   className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800"
                   onError={handleImageError}
                 />
+                {console.log('Profile Image URL:', getImageUrl(profile?.profilePicture))}
               </div>
             </div>
             <div className="pt-20 px-8">
