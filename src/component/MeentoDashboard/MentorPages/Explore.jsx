@@ -191,9 +191,12 @@ function Explore() {
                   }
                   alt={userData.name}
                   className="w-full h-full object-cover"
-                  onError={(e) => e.currentTarget.src = '/image/default-profile.png'} // Fallback to default image
+                  onError={(e) => {
+                    console.error('Image failed to load:', e.currentTarget.src); // Log the failed URL
+                    e.currentTarget.src = '/image/default-profile.png'; // Fallback to default image
+                  }}
                 />
-                {console.log('Image URL:', userData.profilePicture?.startsWith('http')
+                {console.log('Constructed Image URL:', userData.profilePicture?.startsWith('http')
                   ? userData.profilePicture
                   : `${import.meta.env.VITE_BACKEND_URL}${userData.profilePicture || '/image/default-profile.png'}`)}
               </div>
