@@ -15,9 +15,9 @@ library.add(faBars, faRemove, faTwitter, faFacebook, faWhatsapp, faInstagram, fa
 const getImageUrl = (imagePath) => {
   if (!imagePath) return "/image/default-profile.png"; // Default image if no profile picture is provided
   if (imagePath.startsWith('http')) {
-    return imagePath; // Use the full URL if it's already valid
+    return imagePath; 
   }
-  return `${import.meta.env.VITE_BACKEND_URL}${imagePath}`; // Append backend URL for relative paths
+  return `${import.meta.env.VITE_BACKEND_URL}${imagePath}`; 
 };
 
 const Profile = () => {
@@ -42,7 +42,7 @@ const Profile = () => {
         }
       });
  console.log(response, 'response');
-      // Check if the response is ok (status in the range 200-299)
+   
       if (!response.ok) {
         throw new Error('Failed to fetch profile data');
       }
@@ -144,7 +144,7 @@ const Profile = () => {
         ) : (
           <div className="bg-white pb-8 dark:bg-gray-800 rounded-xl shadow-sm">
             <div className="h-48 rounded-t-xl bg-gradient-to-r from-blue-400 to-blue-600 relative">
-              <div className="absolute -wbottom-16 left-8 flex items-end">
+              <div className="absolute -bottom-16 left-8 flex items-end">
                 <img
                   src={getImageUrl(profile?.profilePicture)}
                   alt={`${profile?.firstName || ''} ${profile?.lastName || ''}`}
