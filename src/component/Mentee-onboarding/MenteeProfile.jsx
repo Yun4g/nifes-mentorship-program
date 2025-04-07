@@ -57,7 +57,10 @@ const MenteeProfile = () => {
 
   const handleProfileUpdate = async (updatedProfile) => {
     try {
-      const response = await fetch('/api/users/me', {
+      const apiUrl = '/api/users/me';
+      console.log('Updating profile via API:', apiUrl); // Log the API URL
+
+      const response = await fetch(apiUrl, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -113,7 +116,7 @@ const MenteeProfile = () => {
             <div className="absolute top-20 left-8 flex items-end">
               <div className="relative w-36 h-36 rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-lg">
                 <img
-                  src={profile.image || "/image/young-people-working-from-modern-place 1.png"}
+                  src={profile.image || "/image/young-people-working-from-modern-place 1.png"} // Use profile.image or fallback to default
                   alt={profile.name}
                   className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800"
                   onError={handleImageError}

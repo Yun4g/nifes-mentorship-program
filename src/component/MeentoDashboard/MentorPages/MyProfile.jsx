@@ -13,11 +13,11 @@ library.add(faBars, faRemove, faTwitter, faFacebook, faWhatsapp, faInstagram, fa
 
 // Function to get full image URL
 const getImageUrl = (imagePath) => {
-  if (!imagePath) return "/image/default-profile.png";
+  if (!imagePath) return "/image/default-profile.png"; // Default image if no profile picture is provided
   if (imagePath.startsWith('http')) {
-    return imagePath; // Return the full URL if it's already a valid link
+    return imagePath; // Use the full URL if it's already valid
   }
-  return `${import.meta.env.VITE_BACKEND_URL}${imagePath}`; // Prepend backend URL for relative paths
+  return `${import.meta.env.VITE_BACKEND_URL}${imagePath}`; // Append backend URL for relative paths
 };
 
 const Profile = () => {
@@ -31,8 +31,10 @@ const Profile = () => {
       setIsLoading(true);
       setError(null);
 
-      // Corrected the API endpoint
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/profile`, {
+      const apiUrl = `${import.meta.env.VITE_API_URL}/users/profile`;
+      console.log('Fetching profile from API:', apiUrl); // Log the API URL
+
+      const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
