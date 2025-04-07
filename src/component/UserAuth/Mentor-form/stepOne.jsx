@@ -16,14 +16,16 @@ function StepOne() {
         return;
       }
 
+      const previewUrl = URL.createObjectURL(file); // Generate preview URL
+      setImageUrl(previewUrl); // Set the preview URL for the image
+
       try {
         setUploading(true);
         const formData = new FormData();
         formData.append('profilePicture', file);
 
         const response = await userApi.uploadProfilePicture(formData);
-        const uploadedUrl = response.data.imageUrl;
-        setImageUrl(uploadedUrl);
+        console.log('API Response:', response);
       } catch (error) {
         console.error('Error uploading image:', error);
         alert(error.message || 'Failed to upload image. Please try again.');
