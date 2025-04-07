@@ -20,7 +20,7 @@ const Mentee = () => {
             <img src={asset.mentee2} alt=""  className=' w-[120%] h-[90px] sm:w-[100%] lg:h-[100%] sm:h-[80px] md:w-[120%] rounded-l-xl' />
             <div className='absolute  top-20 left-5 sm:top-14 flex items-center justify-left sm:gap-x-2 gap-x-2'>
               <img src={asset.mentee1} alt="" className=' w-[100px] sm:w-[50%] lg:w-[40%] border-4 border-gray-100 rounded-full' />
-              <div className='font-bold text-[15px] sm:text-[10px] text-left lg:text-xl lg:pt-7'>
+              <div className='font-bold text-[15px] sm:text-[10px] mt-3 text-left lg:text-xl lg:pt-7'>
                 <h1>Emmanuella Bernard </h1>
                 <p>Registered Nurse</p>
               </div>

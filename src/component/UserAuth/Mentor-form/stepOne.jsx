@@ -16,8 +16,8 @@ function StepOne() {
         return;
       }
 
-      const previewUrl = URL.createObjectURL(file); // Generate preview URL
-      setImageUrl(previewUrl); // Set the preview URL for the image
+      const previewUrl = URL.createObjectURL(file); 
+      setImageUrl(previewUrl); 
 
       try {
         setUploading(true);
