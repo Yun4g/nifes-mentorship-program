@@ -22,7 +22,7 @@ function Explore() {
         const response = await userApi.getAllUsers(); // Assuming this endpoint exists in the backend
         console.log('Fetched users:', response.data); 
         setUsers(response.data);
-        console.log('enter:',users.profilePicture)
+        console.log('enter:',users)
       } catch (error) {
         console.error("Error fetching users:", error);
         setError(error.message);
