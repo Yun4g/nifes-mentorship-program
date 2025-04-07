@@ -53,7 +53,7 @@ const MenteeDashboard = () => {
       <div className="lg:hidden">
         <NavRes activeComponent={activeComponent} setActiveComponent={setActiveComponent} />
       </div>
-      <div className="flex-1">
+      <div className="flex-1  h-screen ">
         {renderActiveComponent()}
       </div>
     </div>

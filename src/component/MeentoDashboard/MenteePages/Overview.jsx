@@ -206,7 +206,7 @@ function Overview() {
                 <h3 className="text-2xl font-bold mt-1">{acceptedMentors?.length || 0}</h3>
               </div>
               <div className="bg-blue-100 p-3 rounded-full">
-                <img src="/image/mentor-icon.png" alt="Mentors" className="w-8 h-8" />
+               
               </div>
             </div>
           </div>
@@ -219,7 +219,7 @@ function Overview() {
                 <h3 className="text-2xl font-bold mt-1">{stats?.totalSessions || 0}</h3>
               </div>
               <div className="bg-green-100 p-3 rounded-full">
-                <img src="/image/session-icon.png" alt="Sessions" className="w-8 h-8" />
+               
               </div>
             </div>
           </div>
@@ -232,7 +232,7 @@ function Overview() {
                 <h3 className="text-2xl font-bold mt-1">{stats?.upcomingSessions || 0}</h3>
               </div>
               <div className="bg-orange-100 p-3 rounded-full">
-                <img src="/image/calendar-icon.png" alt="Calendar" className="w-8 h-8" />
+               
               </div>
             </div>
           </div>
