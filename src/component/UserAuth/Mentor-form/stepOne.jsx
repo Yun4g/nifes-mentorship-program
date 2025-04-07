@@ -32,6 +32,7 @@ function StepOne() {
       }
     }
   };
+  console.log(imageUrl, 'imageUrl');
 
   const handleGenderSelect = (selectedGender) => {
     setGender(selectedGender);
@@ -73,7 +74,12 @@ function StepOne() {
         <div className='flex flex-col lg:flex-row items-center mt-5 gap-3'>
           <div className='h-[75px] w-[75px] rounded-full flex justify-center items-center bg-slate-600 font-medium text-blue-950'>
             {imageUrl ? (
-              <img src={imageUrl} className='h-full w-full rounded-full object-cover' alt="Profile" />
+              <img 
+                src={imageUrl} 
+                className='h-full w-full rounded-full object-cover' 
+                alt="Profile" 
+                onError={(e) => { e.target.src = ''; setImageUrl(null); }} 
+              />
             ) : (
               <p className='text-4xl'>E</p>
             )}
