@@ -4,7 +4,7 @@ import { userApi } from '@/lib/api';
 
 function StepOne() {
   const { handleIncreament } = useContext(GlobalContext);
-  const [imageUrl, setImageUrl] = useState('');
+  const [imageUrl, setImageUrl] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [gender, setGender] = useState('');
 
@@ -23,10 +23,9 @@ function StepOne() {
 
         const response = await userApi.uploadProfilePicture(formData);
         console.log('API Response:', response); 
-        const baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000'; // Replace with your API base URL
-        const fullImageUrl = `${baseUrl}${response.data.profilePicture}`;
-        setImageUrl(fullImageUrl);
-        console.log('Full Image URL:', fullImageUrl); // Debugging
+        console.log('Full API Response:', response); // Debugging
+        setImageUrl(response.data.profilePicture);
+        console.log('Image URL:', imageUrl); // Debugging
       } catch (error) {
         console.error('Error uploading image:', error);
         alert(error.message || 'Failed to upload image. Please try again.');
