@@ -1,5 +1,5 @@
 import { GlobalContext } from '@/component/GlobalStore/GlobalState';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { userApi } from '@/lib/api';
 
 function StepOne() {
@@ -23,9 +23,8 @@ function StepOne() {
 
         const response = await userApi.uploadProfilePicture(formData);
         console.log('API Response:', response); 
-        console.log('Full API Response:', response); // Debugging
-        setImageUrl(response.data.profilePicture);
-        console.log('Image URL:', imageUrl); // Debugging
+        setImageUrl(response.data.profilePicture); // Set the image URL
+        console.log('Uploaded Image URL:', response.data.profilePicture); // Log the URL directly
       } catch (error) {
         console.error('Error uploading image:', error);
         alert(error.message || 'Failed to upload image. Please try again.');
@@ -34,6 +33,12 @@ function StepOne() {
       }
     }
   };
+
+  useEffect(() => {
+    if (imageUrl) {
+      console.log('Updated Image URL:', imageUrl); // Log whenever imageUrl changes
+    }
+  }, [imageUrl]);
 
   const handleGenderSelect = (selectedGender) => {
     setGender(selectedGender);
