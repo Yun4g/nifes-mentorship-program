@@ -13,8 +13,8 @@ const Overview = () => {
             <h1 className='text-lg text-orange-50 font-bold sm:text-4xl'>Your Path to Success, Starts Here</h1>
             <h5 className='text-orange-50 font-semibold text-[12px] sm:text-md'>Connect with Industry Leaders, Accelerate Your Career.</h5>
             <button
-              onClick={() => navigate('/SignUp')}
-              className="mx-auto text-orange-500 text-[10px] sm:text-sm md:block border bg-orange-50 flex border-orange-50 px-2 py-1 sm:px-6 sm:py-2 rounded-xl"
+              onClick={() => navigate('/sign-up')}
+              className="mx-auto text-orange-500 text-[10px] sm:text-sm md:block border bg-orange-50 flex border-orange-50 px-4 py-2 sm:px-8 sm:py-3 rounded-xl shadow-lg hover:bg-orange-500 hover:text-white transition-all duration-300 ease-in-out transform hover:scale-105"
             >
               Get Started
             </button>
