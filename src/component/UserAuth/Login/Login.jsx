@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock, faEye, faEyeSlash, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
@@ -16,6 +16,26 @@ function SignIn() {
     handleSubmit,
     formState: { errors },
   } = useForm();
+
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('userData'));
+    if (userData?.token) {
+      switch (userData.role?.toLowerCase()) {
+        case 'mentor':
+          navigate('/mentor-dashboard');
+          break;
+        case 'mentee':
+          navigate('/mentee-dashboard');
+          break;
+        case 'admin':
+          navigate('/admin-dashboard');
+          break;
+        default:
+          console.error('Invalid user role:', userData.role);
+          break;
+      }
+    }
+  }, [navigate]);
 
   // Toggle password visibility
   const handlePasswordType = () => {
