@@ -23,7 +23,10 @@ function SignIn() {
       const token = JSON.parse(localStorage.getItem('userData'))?.token;
       if (token) {
         try {
-          const response = await fetch(`${API_URL}/users/validate-token`, {
+          const endpoint = `${API_URL || 'https://fallback-api-url.com'}/users/validate-token`;
+          console.log('API_URL:', API_URL); // Log the API_URL for debugging
+          console.log('Validating token at:', endpoint); // Log the endpoint for debugging
+          const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -32,13 +35,24 @@ function SignIn() {
           });
 
           if (!response.ok) {
+            console.error('Response details:', response); // Log full response for debugging
+            if (response.status === 404) {
+              setError('Service unavailable. Please try again later or contact support.');
+              return;
+            }
             throw new Error('Invalid or expired token.');
           }
 
           const userData = await response.json();
+          if (!userData.emailVerified) {
+            setShowVerificationModal(true); // Prompt email verification for old users
+            return;
+          }
+
           redirectUser(userData);
         } catch (err) {
-          console.error(err.message);
+          console.error('Error during token validation:', err.message); // Improved error logging
+          setError(err.message); // Display error to the user
           localStorage.removeItem('userData'); // Clear invalid token
         }
       }
@@ -112,7 +126,7 @@ function SignIn() {
 
       // Check email verification status
       if (!result.user.emailVerified) {
-        setShowVerificationModal(true);
+        setShowVerificationModal(true); // Prompt email verification for new users
         return;
       }
 
