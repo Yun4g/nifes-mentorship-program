@@ -177,6 +177,17 @@ userSchema.methods.generateAuthToken = function() {
   );
 };
 
+// Static method to validate token
+userSchema.statics.validateToken = async function (token) {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await this.findById(decoded.id).select('-password');
+    return user || null;
+  } catch (error) {
+    return null;
+  }
+};
+
 const User = mongoose.model('User', userSchema);
 
 export { userSchema };

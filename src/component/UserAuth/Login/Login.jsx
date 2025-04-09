@@ -17,29 +17,63 @@ function SignIn() {
     formState: { errors },
   } = useForm();
 
+  // Redirect returning users immediately
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem('userData'));
-    if (userData?.token) {
-      switch (userData.role?.toLowerCase()) {
-        case 'mentor':
-          navigate('/mentor-dashboard');
-          break;
-        case 'mentee':
-          navigate('/mentee-dashboard');
-          break;
-        case 'admin':
-          navigate('/admin-dashboard');
-          break;
-        default:
-          console.error('Invalid user role:', userData.role);
-          break;
+    const validateToken = async () => {
+      const token = JSON.parse(localStorage.getItem('userData'))?.token;
+      if (token) {
+        try {
+          const response = await fetch(`${API_URL}/users/validate-token`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error('Invalid or expired token.');
+          }
+
+          const userData = await response.json();
+          redirectUser(userData);
+        } catch (err) {
+          console.error(err.message);
+          localStorage.removeItem('userData'); // Clear invalid token
+        }
       }
-    }
+    };
+
+    validateToken();
   }, [navigate]);
 
-  // Toggle password visibility
-  const handlePasswordType = () => {
-    setPasswordType(!passwordType);
+  // Helper function to handle redirection based on user data
+  const redirectUser = (userData) => {
+    if (!userData.profileCompleted) {
+      navigate('/mode-of-registering');
+      return;
+    }
+
+    if (!userData.paymentCompleted) {
+      navigate('/payment');
+      return;
+    }
+
+    switch (userData.role?.toLowerCase()) {
+      case 'mentor':
+        navigate('/mentor-dashboard');
+        break;
+      case 'mentee':
+        navigate('/mentee-dashboard');
+        break;
+      case 'admin':
+        navigate('/admin-dashboard');
+        break;
+      default:
+        console.error('Invalid user role:', userData.role);
+        setError('Invalid user role. Please contact support.');
+        break;
+    }
   };
 
   // Handle form submission
@@ -64,7 +98,7 @@ function SignIn() {
       }
 
       // Store user data in localStorage
-      localStorage.setItem('userData', JSON.stringify({
+      const userData = {
         id: result.user.id,
         firstName: result.user.firstName,
         lastName: result.user.lastName,
@@ -73,7 +107,8 @@ function SignIn() {
         profileCompleted: result.user.profileCompleted,
         paymentCompleted: result.user.paymentCompleted,
         token: result.token,
-      }));
+      };
+      localStorage.setItem('userData', JSON.stringify(userData));
 
       // Check email verification status
       if (!result.user.emailVerified) {
@@ -81,36 +116,16 @@ function SignIn() {
         return;
       }
 
-      // Redirect based on profile and payment status
-      if (!result.user.profileCompleted) {
-        navigate('/mode-of-registering');
-        return;
-      }
-
-      if (!result.user.paymentCompleted) {
-        navigate('/payment');
-        return;
-      }
-
-      // Navigate based on user role
-      switch (result.user.role?.toLowerCase()) {
-        case 'mentor':
-          navigate('/mentor-dashboard');
-          break;
-        case 'mentee':
-          navigate('/mentee-dashboard');
-          break;
-        case 'admin':
-          navigate('/admin-dashboard');
-          break;
-        default:
-          console.error('Invalid user role:', result.user.role);
-          setError('Invalid user role. Please contact support.');
-          break;
-      }
+      // Redirect user after successful login
+      redirectUser(userData);
     } catch (err) {
       setError(err.message || 'Failed to login. Please try again.');
     }
+  };
+
+  // Toggle password visibility
+  const handlePasswordType = () => {
+    setPasswordType(!passwordType);
   };
 
   return (
