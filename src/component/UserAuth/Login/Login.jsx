@@ -37,10 +37,10 @@ function SignIn() {
           if (!response.ok) {
             console.error('Response details:', response); // Log full response for debugging
             if (response.status === 404) {
-              setError('Service unavailable. Please try again later or contact support.');
-              return;
+              console.warn('Endpoint not found. Skipping token validation.');
+              return; // Skip validation if the endpoint is unavailable
             }
-            throw new Error('Invalid or expired token.');
+            throw new Error(response.status === 401 ? 'Invalid or expired token.' : 'Failed to validate token.');
           }
 
           const userData = await response.json();

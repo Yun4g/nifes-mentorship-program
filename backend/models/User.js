@@ -184,6 +184,7 @@ userSchema.statics.validateToken = async function (token) {
     const user = await this.findById(decoded.id).select('-password');
     return user || null;
   } catch (error) {
+    console.error('Error validating token:', error.message); // Log error message
     return null;
   }
 };

@@ -18,7 +18,13 @@ export const auth = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error('Auth middleware error:', error);
-    res.status(401).json({ message: 'Invalid token. Authorization denied.' });
+    console.error('Auth middleware error:', error.message); // Log error message
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ message: 'Invalid token. Authorization denied.' });
+    }
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Token expired. Please log in again.' });
+    }
+    res.status(500).json({ message: 'Server error. Authorization denied.' });
   }
 };
