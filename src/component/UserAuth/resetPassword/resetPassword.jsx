@@ -3,13 +3,12 @@ import { useForm } from 'react-hook-form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../lib/AuthContext';
+import { userApi } from '../../../lib/api'; // Import userApi
 
 function ResetPassword() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
-  const { ...rest } = useAuth();
 
   const {
     register,
@@ -21,19 +20,18 @@ function ResetPassword() {
     try {
       setError('');
       setSuccess('');
-      const response = await fetch('/api/users/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: data.email }),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to send reset instructions. Please try again.');
+      console.log('Email to store:', data.email); // Debugging: Log the email
+      if (data.email) {
+        localStorage.setItem('resetEmail', data.email); // Store email in localStorage
+      } else {
+        throw new Error('Email is undefined or empty');
       }
-      setSuccess('Password reset instructions have been sent to your email');
+      const response = await userApi.forgotPassword(data.email);
+      setSuccess('Password reset instructions and OTP have been sent to your email');
+      navigate(response.data.redirect); // Redirect to OTP page
     } catch (err) {
-      setError(err.message || 'Failed to send reset instructions. Please try again.');
+      console.error('Error storing email or sending request:', err); // Debugging: Log errors
+      setError(err.response?.data?.message || 'Failed to send reset instructions. Please try again.');
     }
   };
 

@@ -6,9 +6,11 @@ import { useContext } from 'react';
 import { GlobalContext } from '@/component/GlobalStore/GlobalState';
 import { sessionApi } from '@/lib/api';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/lib/AuthContext'; // Import useAuth
 
 const Sessions = () => {
   const { handleToggleState } = useContext(GlobalContext);
+  const { token } = useAuth(); // Get token from useAuth
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,20 +25,25 @@ const Sessions = () => {
       let response;
       switch (activeTab) {
         case 'pending':
-          response = await sessionApi.getPending();
+          response = await sessionApi.getPending(); // Token is automatically added by the interceptor
           break;
         case 'accepted':
-          response = await sessionApi.getAccepted();
+          response = await sessionApi.getAccepted(); // Token is automatically added by the interceptor
           break;
         case 'history':
-          response = await sessionApi.getHistory();
+          response = await sessionApi.getHistory(); // Token is automatically added by the interceptor
           break;
         default:
-          response = await sessionApi.getPending();
+          response = await sessionApi.getPending(); // Token is automatically added by the interceptor
       }
+
+      // Debug: Log the response to verify the API call
+      console.log('Fetched sessions:', response.data);
+
       setSessions(response.data);
       setLoading(false);
     } catch (err) {
+      console.error('Error fetching sessions:', err);
       setError(err.message);
       setLoading(false);
     }
@@ -44,7 +51,7 @@ const Sessions = () => {
 
   const handleSessionAction = async (sessionId, action) => {
     try {
-      await sessionApi.updateStatus(sessionId, action);
+      await sessionApi.updateStatus(sessionId, action, token); // Pass token to API
       fetchSessions(); // Refresh sessions after action
     } catch (err) {
       setError(err.response?.data?.message || `Failed to ${action} session`);
@@ -192,4 +199,4 @@ const Sessions = () => {
   );
 };
 
-export default Sessions; 
+export default Sessions;

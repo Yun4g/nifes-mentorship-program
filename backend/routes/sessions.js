@@ -89,6 +89,7 @@ router.get('/', auth, async (req, res) => {
 // @access  Private
 router.get('/pending', auth, async (req, res) => {
   try {
+    console.log('Authenticated user:', req.user); // Debug: Log the authenticated user
     const sessions = await Session.find({
       $or: [
         { mentor: req.user.id },
@@ -299,4 +300,4 @@ router.post('/:id/feedback', auth, async (req, res) => {
   }
 });
 
-export default router; 
+export default router;

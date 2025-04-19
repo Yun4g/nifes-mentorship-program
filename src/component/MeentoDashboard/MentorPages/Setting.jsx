@@ -171,14 +171,10 @@ function Setting() {
                     throw new Error('Passwords do not match');
                 }
 
-                if (!profileDetails.password) {
-                    throw new Error('Please enter a new password');
-                }
-
                 await userApi.updatePassword({
                     currentPassword: profileDetails.currentPassword,
                     newPassword: profileDetails.password
-                });
+                }); // Token is automatically added by the interceptor
 
                 setProfileDetails(prev => ({
                     ...prev,
@@ -189,30 +185,9 @@ function Setting() {
 
                 setSuccess('Password Updated Successfully');
             } else {
-                // Remove undefined or empty string values and password fields
-                const updateData = Object.fromEntries(
-                    Object.entries(profileDetails).filter(([key, value]) => {
-                        if (key === 'password' || key === 'confirmPassword' || key === 'currentPassword') {
-                            return false;
-                        }
-                        if (typeof value === 'object') {
-                            return Object.values(value).some(v => v !== undefined && v !== '');
-                        }
-                        return value !== undefined && value !== '';
-                    })
-                );
-
-                const response = await userApi.updateProfile(updateData);
-                
-                // Update both local state and global context
+                const response = await userApi.updateProfile(profileDetails); // Token is automatically added by the interceptor
                 setProfileDetails(response.data);
                 setProfile(response.data);
-                
-                // Update user data in localStorage
-                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-                const updatedUserData = { ...userData, ...response.data };
-                localStorage.setItem('userData', JSON.stringify(updatedUserData));
-                
                 setSuccess('Profile Updated Successfully');
             }
         } catch (error) {

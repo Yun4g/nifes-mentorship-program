@@ -10,8 +10,9 @@ import path from 'path';
 import multer from 'multer';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { sendVerificationEmail, sendLoginNotificationEmail, sendProfileCompletionEmail } from '../services/emailService.js';
+import { sendVerificationEmail, sendLoginNotificationEmail, sendProfileCompletionEmail, sendPasswordResetNotification, sendPasswordChangeNotification, sendConnectionEmail } from '../services/emailService.js';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose'; // Import mongoose for ObjectId validation
 
 // Load environment variables
 dotenv.config();
@@ -203,29 +204,25 @@ router.post('/login', [
   const { email, password } = req.body;
 
   try {
-    // Check if user exists
     let user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Check if email is verified
     if (!user.emailVerified) {
       return res.status(403).json({ message: 'Email not verified. Please verify your email.' });
     }
 
-    // Validate password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Create JWT token
     const payload = {
       userId: user.id,
       role: user.role,
       profileCompleted: user.profileCompleted,
-      paymentCompleted: user.paymentCompleted
+      paymentCompleted: user.paymentCompleted,
     };
 
     jwt.sign(
@@ -233,29 +230,29 @@ router.post('/login', [
       process.env.JWT_SECRET,
       { expiresIn: '24h' },
       (err, token) => {
-        if (err) throw err;
+        if (err) {
+          console.error('JWT generation error:', err.message);
+          return res.status(500).json({ message: 'Error generating token' });
+        }
 
-        // Return both token and user object
+        console.log('Generated Token:', token); // Debug: Log the generated token
         res.json({
-          success: true,
           token,
           user: {
             id: user.id,
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
-            role: user.role || 'mentee', // Default to 'mentee' if role is not set
+            role: user.role,
+            emailVerified: user.emailVerified,
             profileCompleted: user.profileCompleted,
             paymentCompleted: user.paymentCompleted,
-            emailVerified: user.emailVerified
-          }
+          },
         });
       }
     );
-
-    await sendLoginNotificationEmail(user.email, user.firstName); // Send login notification
   } catch (err) {
-    console.error(err.message);
+    console.error('Error during login:', err.message);
     res.status(500).json({
       success: false,
       message: 'Server error during login',
@@ -336,8 +333,10 @@ router.post('/resend-verification', async (req, res) => {
 // @access  Private
 router.get('/profile', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    console.log('Authenticated user:', req.user); // Debug: Log the authenticated user
+    const user = await User.findById(req.user._id).select('-password'); // Use req.user._id
     if (!user) {
+      console.error('User not found for ID:', req.user._id); // Debug: Log missing user
       return res.status(404).json({ message: 'User not found' });
     }
     res.json(user);
@@ -571,44 +570,85 @@ router.put('/update-step-4', auth, async (req, res) => {
   }
 });
 
-// Updated the /forgot-password route to send the reset token via email
+// Updated the /forgot-password route to generate OTP and reset token
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
+      console.error('User not found for email:', email); // Debug log
       return res.status(404).json({ message: 'User not found' });
     }
 
     // Generate reset token
     const resetToken = crypto.randomBytes(32).toString('hex');
-    user.resetPasswordToken = crypto
-      .createHash('sha256')
-      .update(resetToken)
-      .digest('hex');
+    user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
     user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    // Generate 5-digit OTP
+    const otp = Math.floor(10000 + Math.random() * 90000).toString();
+    user.otp = otp;
+    user.otpExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    console.log('Generated OTP:', { email, otp }); // Debug log
     await user.save();
 
-    // Send email with reset token
+    // Construct reset URL
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-    const message = `You are receiving this email because you (or someone else) has requested a password reset. Please click the link below to reset your password:
-
-${resetUrl}
-
-If you did not request this, please ignore this email.`;
 
     try {
-      await sendVerificationEmail(email, message);
-      res.json({ message: 'Password reset email sent' });
-    } catch (error) {
-      console.error('Error sending email:', error);
-      user.resetPasswordToken = undefined;
-      user.resetPasswordExpire = undefined;
-      await user.save();
-      res.status(500).json({ message: 'Error sending email' });
+      // Send OTP and reset URL to the user
+      await sendPasswordResetNotification(user.email, resetUrl, user.firstName, otp);
+    } catch (emailError) {
+      console.error('Error sending email:', emailError); // Log email sending error
+      return res.status(500).json({ message: 'Failed to send password reset email. Please try again later.' });
     }
+
+    res.json({
+      success: true,
+      message: 'Password reset email and OTP sent successfully',
+      redirect: '/get-otp', // Use lowercase path
+      email, // Include email in the response for frontend to store in localStorage
+      token: resetToken, // Include reset token in the response
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error in forgot-password:', error); // Debug log
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Add a new route to verify OTP
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    // Validate email and OTP
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+    if (!otp) {
+      return res.status(400).json({ message: 'OTP is required' });
+    }
+
+    const user = await User.findOne({ email, otp, otpExpire: { $gt: Date.now() } });
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+
+    // OTP is valid, clear it from the database
+    user.otp = undefined;
+    user.otpExpire = undefined;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'OTP verified successfully',
+      redirect: '/change-password', // Redirect user to change password page
+      token: user.resetPasswordToken, // Include reset token in the response
+    });
+  } catch (error) {
+    console.error('Error in verify-otp:', error); // Debug log
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -616,26 +656,32 @@ If you did not request this, please ignore this email.`;
 router.post('/reset-password', async (req, res) => {
   try {
     const { token, password } = req.body;
+
     // Hash token
     const resetPasswordToken = crypto
       .createHash('sha256')
       .update(token)
       .digest('hex');
+
     const user = await User.findOne({
       resetPasswordToken,
-      resetPasswordExpire: { $gt: Date.now() }
+      resetPasswordExpire: { $gt: Date.now() },
     });
+
     if (!user) {
       return res.status(400).json({ message: 'Invalid or expired reset token' });
     }
+
     // Set new password
     user.password = password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
     await user.save();
+
     res.json({ message: 'Password has been reset' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error in reset-password:', error); // Debug log
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
@@ -704,7 +750,7 @@ router.get('/stats', auth, async (req, res) => {
       $or: [
         { sender: req.user.id },
         { recipient: req.user.id }
-      ]
+      ],
     });
     // Get upcoming sessions
     const upcomingSessions = await Session.countDocuments({
@@ -807,7 +853,22 @@ router.get('/payment-status', auth, async (req, res) => {
 // @access  Private
 router.get('/', auth, async (req, res) => {
   try {
-    const users = await User.find().select('-password').sort({ createdAt: -1 });
+    const { excludeUserId } = req.query;
+
+    // Debug: Log the excludeUserId to verify the query parameter
+    console.log('Exclude User ID:', excludeUserId);
+
+    // Build the query to exclude the logged-in user if `excludeUserId` is provided
+    const query = excludeUserId ? { _id: { $ne: excludeUserId } } : {};
+
+    // Debug: Log the query to verify it is constructed correctly
+    console.log('Query:', query);
+
+    const users = await User.find(query).select('-password').sort({ createdAt: -1 });
+
+    // Debug: Log the fetched users to verify the response
+    console.log('Fetched Users:', users);
+
     res.json(users);
   } catch (err) {
     console.error('Error fetching all users:', err.message);
@@ -824,7 +885,6 @@ router.put('/update-profile', auth, async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
     // Define updatable fields
     const updatableFields = [
       'firstName', 'lastName', 'email', 'title', 
@@ -832,7 +892,6 @@ router.put('/update-profile', auth, async (req, res) => {
       'interests', 'gender', 'modeOfContact', 'availability',
       'profilePicture', 'bio', 'social'
     ];
-
     // Update fields
     updatableFields.forEach(field => {
       if (field === 'social' && req.body[field]) {
@@ -841,7 +900,7 @@ router.put('/update-profile', auth, async (req, res) => {
           linkedIn: req.body.social.linkedIn || user.social?.linkedIn || '',
           twitter: req.body.social.twitter || user.social?.twitter || '',
           instagram: req.body.social.instagram || user.social?.instagram || '',
-          website: req.body.social.website || user.social?.website || '',
+          website: req.body.social.website || user.social?.website || ''
         };
       } else if (field === 'expertise' && req.body[field]) {
         user.expertise = Array.isArray(req.body.expertise)
@@ -866,6 +925,121 @@ router.put('/update-profile', auth, async (req, res) => {
   } catch (err) {
     console.error('Error updating profile:', err);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Notify user after password reset request
+router.post('/send-reset-notification', async (req, res) => {
+  const { email } = req.body;
+  try {
+    await sendPasswordResetNotification(email);
+    res.status(200).json({ message: 'Reset notification sent successfully' });
+  } catch (error) {
+    console.error('Error sending reset notification:', error);
+    res.status(500).json({ message: 'Failed to send reset notification' });
+  }
+});
+
+// Notify user after successful password change
+router.post('/send-change-notification', async (req, res) => {
+  const { email } = req.body;
+  try {
+    await sendPasswordChangeNotification(email);
+    res.status(200).json({ message: 'Change notification sent successfully' });
+  } catch (error) {
+    console.error('Error sending change notification:', error);
+    res.status(500).json({ message: 'Failed to send change notification' });
+  }
+});
+
+// @route   PUT api/users/password
+// @desc    Update user's password during signup
+// @access  Private
+router.put('/password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    // Debug log to confirm received data
+    console.log('Received data:', { token, newPassword });
+
+    // Validate newPassword
+    if (!newPassword) {
+      return res.status(400).json({ message: 'New password is required' });
+    }
+
+    // Trim the password to remove extra spaces
+    const trimmedPassword = newPassword.trim();
+
+    // Validate trimmed password length
+    if (trimmedPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+    }
+
+    // Hash the token
+    const resetPasswordToken = crypto.createHash('sha256').update(token).digest('hex');
+    console.log('Hashed token:', resetPasswordToken);
+
+    // Find the user by reset token
+    const user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      console.error('User not found or token expired');
+      return res.status(400).json({ message: 'Invalid or expired reset token' });
+    }
+
+    // Replace the previous password with the new one
+    user.password = trimmedPassword;
+    user.resetPasswordToken = undefined; // Clear reset token
+    user.resetPasswordExpire = undefined; // Clear token expiration
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Error updating password:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   POST api/users/send-connection-email
+// @desc    Send connection email
+// @access  Private
+router.post('/send-connection-email', auth, async (req, res) => {
+  try {
+    const { recipientId } = req.body;
+
+    // Validate recipientId
+    if (!mongoose.Types.ObjectId.isValid(recipientId)) {
+      return res.status(400).json({ message: 'Invalid recipient ID' });
+    }
+
+    const sender = req.user; // Use the authenticated user as the sender
+    const recipient = await User.findById(recipientId).select('firstName lastName role email');
+    if (!recipient) {
+      return res.status(404).json({ message: 'Recipient not found' });
+    }
+
+    const emailTemplate = `${sender.role}-to-${recipient.role}`;
+    const emailData = {
+      senderName: `${sender.firstName} ${sender.lastName}`.trim(),
+      senderRole: sender.role,
+      senderInterests: sender.interests?.join(', ') || 'N/A',
+      recipientName: `${recipient.firstName} ${recipient.lastName}`,
+    };
+
+    try {
+      await sendConnectionEmail(recipient.email, emailTemplate, emailData);
+    } catch (templateError) {
+      console.error('Error loading email template:', templateError);
+      return res.status(500).json({ message: 'Failed to load email template' });
+    }
+
+    res.status(200).json({ message: 'Connection email sent successfully' });
+  } catch (error) {
+    console.error('Error sending connection email:', error); // Log the error for debugging
+    res.status(500).json({ message: 'Failed to send connection email', error: error.message });
   }
 });
 

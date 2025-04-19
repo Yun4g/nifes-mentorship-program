@@ -3,7 +3,8 @@ import { useForm } from 'react-hook-form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock, faEye, faEyeSlash, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 import { Link, useNavigate } from 'react-router-dom';
-import { API_URL, userApi } from '../../../lib/api'; // Import userApi
+import { API_URL } from '../../../lib/api'; // Import userApi
+import { useAuth } from '../../../lib/AuthContext'; // Add this import
 
 function SignIn() {
   const [passwordType, setPasswordType] = useState(false);
@@ -11,6 +12,7 @@ function SignIn() {
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [loading, setLoading] = useState(false); // Add loading state
   const navigate = useNavigate();
+  const { login, user } = useAuth(); // Add this line
 
   const {
     register,
@@ -18,117 +20,41 @@ function SignIn() {
     formState: { errors },
   } = useForm();
 
-  // Redirect returning users immediately
-  useEffect(() => {
-    const validateToken = async () => {
-      const token = JSON.parse(localStorage.getItem('userData'))?.token;
-      if (token) {
-        try {
-          const endpoint = `${API_URL || 'https://leapon.onrender.com'}/users/validate-token`;
-          console.log('API_URL:', API_URL); // Log the API_URL for debugging
-          console.log('Validating token at:', endpoint); // Log the endpoint for debugging
-          const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          if (!response.ok) {
-            console.error('Response details:', response); // Log full response for debugging
-            if (response.status === 404) {
-              console.warn('Endpoint not found. Skipping token validation.');
-              return; // Skip validation if the endpoint is unavailable
-            }
-            throw new Error(response.status === 401 ? 'Invalid or expired token.' : 'Failed to validate token.');
-          }
-
-          const userData = await response.json();
-          if (!userData.emailVerified) {
-            setShowVerificationModal(true); // Prompt email verification for old users
-            return;
-          }
-
-          redirectUser(userData);
-        } catch (err) {
-          console.error('Error during token validation:', err.message); // Improved error logging
-          setError(err.message); // Display error to the user
-          localStorage.removeItem('userData'); // Clear invalid token
-        }
-      }
-    };
-
-    validateToken();
-  }, [navigate]);
-
-  // Helper function to handle redirection based on user data
-  const redirectUser = (userData) => {
-    if (!userData.profileCompleted) {
-      navigate('/mode-of-registering');
-      return;
-    }
-
-    if (!userData.paymentCompleted) {
-      navigate('/payment');
-      return;
-    }
-
-    // Redirect based on role
-    const role = userData.role?.toLowerCase();
-    if (role === 'mentor') {
-      navigate('/mentor-dashboard');
-    } else if (role === 'mentee') {
-      navigate('/mentee-dashboard');
-    } else if (role === 'admin') {
-      navigate('/admin-dashboard');
-    } else {
-      console.error('Invalid user role:', userData.role);
-      setError('Invalid user role. Please contact support.');
-    }
-  };
+  // Remove or comment out the useEffect for token validation as it's handled by AuthContext
 
   // Handle form submission
   const onSubmit = async (data) => {
     try {
-      setLoading(true); // Set loading to true
+      setLoading(true);
       setError('');
 
-      // Use userApi.login for authentication
-      const response = await userApi.login(data.email.toLowerCase(), data.password);
-      const result = response.data;
+      // Use the login method from AuthContext instead of direct API call
+      const userData = await login(data.email.toLowerCase(), data.password);
+      console.log('Login response:', userData);
 
       // Check email verification status
-      if (!result.user.emailVerified) {
-        setShowVerificationModal(true); // Prompt email verification for new users
+      if (!userData.emailVerified) {
+        setShowVerificationModal(true);
         return;
       }
 
       // Redirect user based on role and requirements
-      if (!result.user.profileCompleted) {
+      if (!userData.profileCompleted) {
         navigate('/mode-of-registering');
         return;
       }
 
-      if (!result.user.paymentCompleted) {
+      if (!userData.paymentCompleted) {
         navigate('/payment');
         return;
       }
 
       // Redirect based on role
-      const role = result.user.role?.toLowerCase();
-      if (role === 'mentor') {
-        navigate('/mentor-dashboard');
-      } else if (role === 'mentee') {
-        navigate('/mentee-dashboard');
-      } else if (role === 'admin') {
-        navigate('/admin-dashboard');
-      } else {
-        console.error('Invalid user role:', result.user.role);
-        setError('Invalid user role. Please contact support.');
-      }
+      const role = userData.role?.toLowerCase() || 'mentee';
+      navigate(`/${role}-dashboard`);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to login. Please try again.');
+      console.error('Login error:', err.message);
+      setError(err.message || 'Failed to login. Please try again.');
     } finally {
       setLoading(false); // Reset loading state
     }

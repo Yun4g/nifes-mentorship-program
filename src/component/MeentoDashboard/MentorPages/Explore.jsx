@@ -1,30 +1,30 @@
 import React, { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faSearch, faUserGraduate, faUserTie, faStar } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { GlobalContext } from "@/component/GlobalStore/GlobalState";
-import { useAuth } from '../../../lib/AuthContext';
 import { userApi } from '../../../lib/api';
+import { useAuth } from '../../../lib/AuthContext'; // Import the authentication context
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
 
 function Explore() {
-  const { upDatePage, handleToggleState, setSelectedMentee, AddMentees, acceptedMentees, setSelectedChatUser } =
-    useContext(GlobalContext);
-  const { user } = useAuth();
+  const { upDatePage, handleToggleState } = useContext(GlobalContext);
+  const { token } = useAuth(); // Get the token from the authentication context
+  const navigate = useNavigate(); // Initialize navigate for redirection
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sentRequests, setSentRequests] = useState([]); // Track users who received a connection request
 
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        // Fetch all users regardless of role
-        const response = await userApi.getAllUsers(); 
-        console.log('Fetched users:', response.data); 
+        const response = await userApi.getAllUsers();
         setUsers(response.data);
       } catch (error) {
-        console.error("Error fetching users:", error);
-        setError(error.message);
+        console.error('Error fetching users:', error.response?.data?.message || error.message);
+        setError(error.response?.data?.message || 'Failed to fetch users');
       } finally {
         setLoading(false);
       }
@@ -33,64 +33,64 @@ function Explore() {
     fetchUsers();
   }, []);
 
-  // Log users whenever it changes
-  useEffect(() => {
-    console.log('Updated users:', users);
-  }, [users]);
-
-  const filteredUsers = users
-    .filter((item) => !acceptedMentees.some((mentee) => mentee.id === item._id))
-    .filter((item) =>
-      searchQuery
-        ? item.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (item.expertise && item.expertise.some(skill => 
-            skill.toLowerCase().includes(searchQuery.toLowerCase())
-          ))
-        : true
-    );
-
-  const handleStartChat = async (selectedUser) => {
+  const handleConnect = async (selectedUser) => {
     try {
-      // Create a new conversation
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/messages/conversations`, {
+      const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+      console.log('Token:', token); // Debug: Log the token to verify its value
+
+      if (!token) {
+        alert('You are not logged in. Redirecting to login page...');
+        navigate('/login'); // Redirect to login page if token is missing
+        return;
+      }
+
+      if (!selectedUser._id) {
+        throw new Error('Invalid recipient ID');
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/users/send-connection-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`, // Include the token in the Authorization header
         },
         body: JSON.stringify({
-          participantId: selectedUser._id,
+          recipientId: selectedUser._id,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Backend error response:', errorData);
-        throw new Error(errorData.message || 'Failed to create conversation');
+        throw new Error(errorData.message || 'Failed to send connection email');
       }
 
-      const conversation = await response.json();
+      const result = await response.json();
+      console.log('Connection email sent successfully:', result);
+      alert('Connection email sent successfully!');
 
-      // Add the user to messaging contacts
-      AddMentees(selectedUser);
-
-      // Navigate to the messaging page
-      setSelectedChatUser(selectedUser);
-      upDatePage('Message');
+      // Add the user to the sentRequests list
+      setSentRequests((prev) => [...prev, selectedUser._id]);
     } catch (error) {
-      if (error.message === 'Conversation already exists') {
-        console.warn('Conversation already exists. Redirecting to the chat page.');
-        setSelectedChatUser(selectedUser);
-        upDatePage('Message');
-      } else {
-        console.error('Error creating conversation:', error);
-        setError('Failed to connect. Please try again.');
-        setTimeout(() => setError(null), 3000); // Clear error after 3 seconds
-      }
+      console.error('Error sending connection email:', error);
+      setError(error.message || 'Failed to send connection email. Please try again.');
+      setTimeout(() => setError(null), 3000); // Clear error after 3 seconds
     }
   };
+
+  // Filter users to exclude those who have received a connection request unless searched
+  const filteredUsers = users.filter((user) => {
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      return (
+        user.firstName.toLowerCase().includes(query) ||
+        user.lastName.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query) ||
+        user.role.toLowerCase().includes(query)
+      );
+    }
+    return !sentRequests.includes(user._id);
+  });
 
   if (loading) {
     return (
@@ -169,68 +169,57 @@ function Explore() {
 
       {/* User Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredUsers.length === 0 ? (
-          <div className="col-span-full text-center py-12">
-            <p className="text-xl text-gray-600 dark:text-gray-400">
-              No users found matching your search hi
-            </p>
-          </div>
-        ) : (
-          filteredUsers.map((userData) => (
-            <div
-              key={userData._id}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover:shadow-lg transform hover:-translate-y-2 transition-all duration-300"
-            >
-              {/* User Image */}
-              <div className="relative h-48">
-                <img
-                  src={
-                    userData.profilePicture?.startsWith('http')
-                      ? userData.profilePicture
-                      : `${import.meta.env.VITE_BACKEND_URL}${userData.profilePicture || '/uploads/profiles/default-profile.png'}`
-                  }
-                  alt={userData.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    console.error('Image failed to load:', e.currentTarget.src); // Log the failed URL
-                    e.currentTarget.src = `${import.meta.env.VITE_BACKEND_URL}/uploads/profiles/default-profile.png`; // Fallback to backend default image
-                  }}
-                />
-                {console.log('Constructed Image URL:', userData.profilePicture?.startsWith('http')
-                  ? userData.profilePicture
-                  : `${import.meta.env.VITE_BACKEND_URL}${userData.profilePicture || '/uploads/profiles/default-profile.png'}`)}
-              </div>
-
-              {/* User Info */}
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  {`${userData.firstName} ${userData.lastName}`}
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  Role: {userData.role || 'N/A'}
-                </p>
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {userData.interests?.map((interest, index) => (
-                    <span
-                      key={index}
-                      className="px-2 py-1 bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-300 text-xs rounded-full"
-                    >
-                      {interest}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Connect Button */}
-                <button
-                  onClick={() => handleStartChat(userData)}
-                  className="w-full bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition-colors"
-                >
-                  Connect
-                </button>
-              </div>
+        {filteredUsers.map((userData) => (
+          <div
+            key={userData._id}
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover:shadow-lg transform hover:-translate-y-2 transition-all duration-300"
+          >
+            {/* User Image */}
+            <div className="relative h-48">
+              <img
+                src={
+                  userData.profilePicture?.startsWith('http')
+                    ? userData.profilePicture
+                    : `${import.meta.env.VITE_BACKEND_URL}${userData.profilePicture || '/uploads/profiles/default-profile.png'}`
+                }
+                alt={userData.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  console.error('Image failed to load:', e.currentTarget.src); // Log the failed URL
+                  e.currentTarget.src = `${import.meta.env.VITE_BACKEND_URL}/uploads/profiles/default-profile.png`; // Fallback to backend default image
+                }}
+              />
             </div>
-          ))
-        )}
+
+            {/* User Info */}
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                {`${userData.firstName} ${userData.lastName}`}
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Role: {userData.role || 'N/A'}
+              </p>
+              <div className="flex flex-wrap gap-2 mb-6">
+                {userData.interests?.map((interest, index) => (
+                  <span
+                    key={index}
+                    className="px-2 py-1 bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-300 text-xs rounded-full"
+                  >
+                    {interest}
+                  </span>
+                ))}
+              </div>
+
+              {/* Connect Button */}
+              <button
+                onClick={() => handleConnect(userData)}
+                className="w-full bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition-colors"
+              >
+                Connect
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

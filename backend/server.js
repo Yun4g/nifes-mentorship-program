@@ -31,6 +31,9 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 
+// Add this middleware to parse JSON request bodies
+app.use(express.json());
+
 // Initialize socket.io
 const io = initializeSocket(httpServer);
 app.set('io', io);

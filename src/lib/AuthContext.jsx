@@ -34,9 +34,11 @@ export const AuthProvider = ({ children }) => {
       const tokenExpiry = new Date(parsedData.tokenExpiry);
       const now = new Date();
 
-      // Check if token is expired
+      console.log('Token expiry:', tokenExpiry); // Debug: Log token expiry
+      console.log('Current time:', now); // Debug: Log current time
+
       if (now >= tokenExpiry) {
-        // Token is expired, clear storage
+        console.warn('Token expired. Logging out.');
         localStorage.removeItem('userData');
         localStorage.removeItem('token');
         setUser(null);
@@ -44,15 +46,17 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      // Set the user from localStorage first
       setUser(parsedData);
 
-      // Then try to validate with server in the background
       try {
-        const response = await userApi.getProfile(); // Use updated route
+        const response = await userApi.getProfile(); // Validate token with server
         setUser(response.data);
       } catch (error) {
-        console.error('Server validation failed:', error);
+        if (error.response?.status === 404) {
+          console.error('Profile not found:', error.response.data.message);
+        } else {
+          console.error('Server validation failed:', error);
+        }
       }
     } catch (error) {
       console.error('Auth status check failed:', error);
@@ -65,11 +69,22 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await userApi.login(email, password);
+
+      // Debug: Log the entire response to verify its structure
+      console.log('Login response:', response);
+
       const { token, user } = response.data;
 
-      if (!token) {
-        throw new Error('No token received from server');
+      if (!token || !user) {
+        throw new Error('Invalid response from server. Token or user data is missing.');
       }
+
+      // Debug: Log the token and user to verify they are being extracted correctly
+      console.log('Token received:', token);
+      console.log('User data received:', user);
+
+      // Store token in local storage
+      localStorage.setItem('token', token);
 
       // Calculate token expiration (24 hours from now)
       const tokenExpiry = new Date();
@@ -83,11 +98,11 @@ export const AuthProvider = ({ children }) => {
       };
 
       localStorage.setItem('userData', JSON.stringify(userData));
-      localStorage.setItem('token', token);
       setUser(user);
 
-      return userData;
+      return user; // Return the user data for the component to use
     } catch (error) {
+      console.error('Login error:', error.response?.data || error.message);
       throw new Error(error.response?.data?.message || 'Login failed');
     }
   };

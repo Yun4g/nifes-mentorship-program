@@ -11,7 +11,7 @@ function ResetConfirmation() {
 
       const HandleNavigate = ()=>{
         setOtpShow(!otpshow)
-        navigate('/GetOtp') 
+        navigate('/get-otp') // Use lowercase path
       }
 
 

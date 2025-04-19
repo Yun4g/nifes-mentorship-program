@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { userApi } from "../../../lib/api"; // Import userApi
 
 function GetOtp() {
   const navigate = useNavigate();
@@ -30,23 +31,26 @@ function GetOtp() {
     }
   }, [setValue]);
 
-  // Updated to verify OTP with the backend
   const onSubmit = async (data) => {
     try {
       const otp = Object.values(data).join(''); // Combine OTP fields into a single string
-      const response = await fetch('/api/users/verify-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ otp }),
-      });
-      if (!response.ok) {
-        throw new Error('Invalid OTP. Please try again.');
+      const email = localStorage.getItem('email'); // Retrieve email from localStorage
+      if (!email) {
+        console.error('Email not found in localStorage'); // Debug log
+        throw new Error('Email is required to verify OTP');
       }
-      navigate('/ChangePassword');
+      console.log('Sending OTP verification:', { email, otp }); // Debug log
+      const response = await userApi.verifyOtp({ email, otp }); // Use userApi method
+
+      // Store reset token in localStorage
+      if (response.data.token) {
+        localStorage.setItem('resetToken', response.data.token);
+      }
+
+      navigate(response.data.redirect); // Redirect to change password page
     } catch (err) {
-      alert(err.message || 'Failed to verify OTP. Please try again.');
+      console.error('OTP Verification Error:', err.response?.data || err.message); // Debug log
+      alert(err.response?.data?.message || 'Failed to verify OTP. Please try again.');
     }
   };
 

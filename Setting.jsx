@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import { GlobalContext } from '@/component/GlobalStore/GlobalState';
 import { userApi } from '@/lib/api';
+import { useAuth } from '@/lib/AuthContext'; // Import useAuth
 
 function Setting() {
     const [activeTab, setActiveTab] = useState('basicDetails');
@@ -41,12 +42,14 @@ function Setting() {
         confirmPassword: ''
     });
 
+    const { token } = useAuth(); // Get token from useAuth
+
     // Fetch user profile on component mount
     useEffect(() => {
         const fetchProfile = async () => {
             setLoading(true);
             try {
-                const response = await userApi.getProfile();
+                const response = await userApi.getProfile(token); // Pass token to API
                 const userData = response.data;
                 setProfileDetails(prev => ({
                     ...prev,
@@ -80,7 +83,7 @@ function Setting() {
         };
 
         fetchProfile();
-    }, []);
+    }, [token]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -116,7 +119,7 @@ function Setting() {
                 await userApi.updatePassword({
                     currentPassword: profileDetails.currentPassword,
                     newPassword: profileDetails.password
-                });
+                }, token); // Pass token to API
                 alert('Password Updated Successfully');
                 setProfileDetails(prev => ({
                     ...prev,
@@ -125,7 +128,7 @@ function Setting() {
                     currentPassword: ''
                 }));
             } else {
-                const response = await userApi.updateProfile(profileDetails);
+                const response = await userApi.updateProfile(profileDetails, token); // Pass token to API
                 setProfile(response.data);
                 alert('Profile Updated Successfully');
             }

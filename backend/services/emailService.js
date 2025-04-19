@@ -2,8 +2,15 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import ejs from 'ejs';
 
 dotenv.config();
+
+// Ensure __dirname is defined for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Create a transporter using SMTP
 const transporter = nodemailer.createTransport({
@@ -14,6 +21,9 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD // This should be your Gmail App Password
+  },
+  tls: {
+    rejectUnauthorized: false // Allow self-signed certificates
   }
 });
 
@@ -31,12 +41,17 @@ export const sendEmail = async ({ to, subject, html }) => {
 
 // Load email template
 const loadTemplate = (templateName, replacements) => {
-  const templatePath = path.join(__dirname, '..', 'templates', `${templateName}.html`);
-  let template = fs.readFileSync(templatePath, 'utf8');
-  for (const [key, value] of Object.entries(replacements)) {
-    template = template.replace(new RegExp(`{{${key}}}`, 'g'), value);
+  try {
+    const templatePath = path.join(__dirname, '..', 'templates', `${templateName}.html`);
+    let template = fs.readFileSync(templatePath, 'utf8');
+    for (const [key, value] of Object.entries(replacements)) {
+      template = template.replace(new RegExp(`{{${key}}}`, 'g'), value);
+    }
+    return template;
+  } catch (error) {
+    console.error(`Error loading template "${templateName}":`, error);
+    throw new Error(`Template "${templateName}" not found`);
   }
-  return template;
 };
 
 // Send verification email
@@ -58,6 +73,27 @@ export const sendProfileCompletionEmail = async (email, firstName) => {
   const subject = 'Profile Completion';
   const html = loadTemplate('profileCompletion', { firstName });
   await sendEmail({ to: email, subject, html });
+};
+
+// Send password reset notification email
+export const sendPasswordResetNotification = async (email, resetUrl, firstName, otp) => {
+  const subject = 'Password Reset Requested';
+  const html = loadTemplate('passwordResetNotification', { resetUrl, firstName, otp }); // Pass template name
+  await sendEmail({ to: email, subject, html });
+};
+
+// Send password change notification email
+export const sendPasswordChangeNotification = async (email, firstName) => {
+  const subject = 'Password Changed Successfully';
+  const html = loadTemplate('passwordChangeNotification', { firstName }); // Pass template name
+  await sendEmail({ to: email, subject, html });
+};
+
+// Send connection email
+export const sendConnectionEmail = async (recipientEmail, templateName, data) => {
+  const subject = 'Connection Request on Leap-On Mentorship';
+  const html = loadTemplate(templateName, data);
+  await sendEmail({ to: recipientEmail, subject, html });
 };
 
 export default transporter;

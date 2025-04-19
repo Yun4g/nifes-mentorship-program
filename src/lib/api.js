@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const API_URL = import.meta.env.VITE_API_URL || 'https://leapon.onrender.com'; // Removed trailing `/api`
+export const API_URL = import.meta.env.VITE_API_URL || 'https://leapon.onrender.com/api'; 
 
 // Ensure WebSocket URL is correct
 export const WS_URL = import.meta.env.VITE_API_URL.replace(/^http/, 'ws');
@@ -16,10 +16,16 @@ const api = axios.create({
 // Add token to requests
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token'); // Retrieve token from local storage
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`; // Add token to Authorization header
+    } else {
+      console.warn('No token found in localStorage');
     }
+
+    // Debug: Log the request headers to verify the token is being added
+    console.log('Request headers:', config.headers);
+
     return config;
   },
   (error) => {
@@ -33,25 +39,17 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // If the error is 401 and we haven't tried to refresh the token yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      // Only clear storage and redirect if we get a specific error message
-      // indicating the token is invalid or expired
-      if (error.response?.data?.message?.toLowerCase().includes('token') && 
-          (error.response?.data?.message?.toLowerCase().includes('invalid') || 
-           error.response?.data?.message?.toLowerCase().includes('expired'))) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userData');
-        
-        // Only redirect to login if we're not already on the login page
-        const currentPath = window.location.pathname;
-        if (!currentPath.includes('/login')) {
-          // Use history.pushState instead of window.location.href
-          window.history.pushState({}, '', '/login');
-          window.dispatchEvent(new PopStateEvent('popstate'));
-        }
+      console.warn('Token expired or invalid. Redirecting to login.');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userData');
+
+      const currentPath = window.location.pathname;
+      if (!currentPath.includes('/login')) {
+        window.history.pushState({}, '', '/login');
+        window.dispatchEvent(new PopStateEvent('popstate'));
       }
     }
 
@@ -65,10 +63,20 @@ export const userApi = {
   register: (data) => api.post('/users/register', data),
   getMentors: () => api.get('/users/mentors'),
   getMentees: () => api.get('/users/mentees'),
-  getProfile: () => api.get('/users/profile'), // Updated route
-  getCurrentUser: () => api.get('/users/profile'), // Updated route
-  updateProfile: (data) => api.put('/users/profile', data), // Corrected endpoint
-  updatePassword: (data) => api.put('/users/password', data),
+  getProfile: async () => {
+    try {
+      const response = await api.get('/users/profile');
+      return response;
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      throw error;
+    }
+  },
+  getCurrentUser: () => api.get('/users/profile'), 
+  updateProfile: (data) => api.put('/users/profile', data),
+  updatePassword: async (data) => {
+    return await api.put('/users/password', data);
+  },
   completeProfile: async (profileData) => {
     try {
       const token = localStorage.getItem('token');
@@ -100,7 +108,6 @@ export const userApi = {
     }
   },
   uploadProfilePicture: (formData) => {
-    // Override the default Content-Type for file upload
     const config = {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -115,12 +122,29 @@ export const userApi = {
   initializePayment: (paymentData) => api.post('/payments/initialize', paymentData),
   verifyPayment: (reference) => api.post('/payments/verify', { reference }),
   getPaymentHistory: () => api.get('/payments/history'),
-  updateRole: (data) => api.put('/users/update-role', data), // Token is automatically added via interceptors
-  updateProfileStep2: (data) => api.put('/users/update-step-2', data), // Add this method
-  updateProfileStep3: (data) => api.put('/users/update-step-3', data), // Add this method
-  updateProfileStep4: (data) => api.put('/users/update-step-4', data), // Add this method
+  updateRole: (data) => api.put('/users/update-role', data), 
+  updateProfileStep2: (data) => api.put('/users/update-step-2', data),
+  updateProfileStep3: (data) => api.put('/users/update-step-3', data),
+  updateProfileStep4: (data) => api.put('/users/update-step-4', data),
   applyCoupon: (couponCode) => api.post('/payments/apply-coupon', { couponCode }),
-  getAllUsers: () => api.get('/users'), // Add this method to fetch all users
+  getAllUsers: async (params = {}) => {
+    // Debug: Log the query parameters
+    console.log('Query Parameters:', params);
+
+    const query = new URLSearchParams(params).toString();
+    const response = await api.get(`/users${query ? `?${query}` : ''}`);
+
+    // Debug: Log the API response
+    console.log('API Response:', response.data);
+
+    return response;
+  },
+  forgotPassword: (email) => api.post('/users/forgot-password', { email }),
+  verifyOtp: (data) => api.post('/users/verify-otp', data), 
+  getStats: async () => {
+    const response = await api.get('/users/stats');
+    return response;
+  },
 };
 
 // API methods for sessions

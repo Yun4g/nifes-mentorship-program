@@ -1,20 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLock, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { userApi } from '../../../lib/api'; // Import userApi
 
 function ChangePassword() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [passwordType, setPasswordType] = useState({
+    current: false,
     new: false,
     confirm: false
   });
-  const [resetToken, setResetToken] = useState('');
   const navigate = useNavigate();
-  const location = useLocation();
 
   const {
     register,
@@ -25,28 +24,10 @@ function ChangePassword() {
 
   const newPassword = watch('newPassword');
 
-  useEffect(() => {
-    // Extract token from URL query parameters
-    const queryParams = new URLSearchParams(location.search);
-    const tokenFromUrl = queryParams.get('token');
-
-    if (tokenFromUrl) {
-      setResetToken(tokenFromUrl);
-    } else {
-      // Fallback to token from localStorage
-      const tokenFromStorage = localStorage.getItem('resetToken');
-      if (tokenFromStorage) {
-        setResetToken(tokenFromStorage);
-      } else {
-        setError('Reset token is missing. Please use the reset link or verify your OTP again.');
-      }
-    }
-  }, [location]);
-
   const togglePasswordVisibility = (field) => {
-    setPasswordType((prev) => ({
+    setPasswordType(prev => ({
       ...prev,
-      [field]: !prev[field],
+      [field]: !prev[field]
     }));
   };
 
@@ -54,38 +35,16 @@ function ChangePassword() {
     try {
       setError('');
       setSuccess('');
-
-      if (!resetToken) {
-        throw new Error('Reset token is missing. Please use the reset link or verify your OTP again.');
-      }
-
-      const trimmedNewPassword = data.newPassword.trim();
-      const trimmedConfirmPassword = data.confirmPassword.trim();
-
-      if (trimmedNewPassword.length < 6) {
-        throw new Error('Password must be at least 6 characters long');
-      }
-
-      if (trimmedNewPassword !== trimmedConfirmPassword) {
-        throw new Error('Passwords do not match');
-      }
-
-      console.log('Sending password update request:', {
-        token: resetToken,
-        password: trimmedNewPassword,
-      }); // Debug log
-
       await userApi.updatePassword({
-        token: resetToken,
-        password: trimmedNewPassword,
-      });
-
+        token: localStorage.getItem('resetToken'), // Retrieve token from localStorage
+        password: data.newPassword,
+      }); // Use userApi method
       setSuccess('Password reset successfully');
       setTimeout(() => {
         navigate('/login');
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Failed to reset password. Please try again.');
+      setError(err.response?.data?.message || 'Failed to reset password. Please try again.');
     }
   };
 
@@ -105,7 +64,7 @@ function ChangePassword() {
         </div>
         <div className="w-full px-6 lg:px-0 md:w-[400px]">
           <h1 className="text-2xl font-bold lg:text-[40px] text-customDarkBlue">Change Password</h1>
-          <p className="text-slate-400 text-sm mt-2">Enter your new password</p>
+          <p className="text-slate-400 text-sm mt-2">Enter your current and new password</p>
 
           {error && (
             <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg">
@@ -120,6 +79,37 @@ function ChangePassword() {
           )}
 
           <form className="mt-5" onSubmit={handleSubmit(onSubmit)}>
+            {/* Current Password */}
+            <div className="mt-4">
+              <div className="flex items-center p-2 md:p-4 justify-between gap-3 w-full rounded-xl border-2">
+                <div className="flex items-center justify-center gap-3">
+                  <span>
+                    <FontAwesomeIcon className="text-gray-400 text-xl" icon={faLock} />
+                  </span>
+                  <input
+                    type={passwordType.current ? 'text' : 'password'}
+                    {...register('currentPassword', {
+                      required: 'Current password is required',
+                      minLength: {
+                        value: 6,
+                        message: 'Password must be at least 6 characters long',
+                      },
+                    })}
+                    className="outline-none w-full"
+                    placeholder="Current Password"
+                  />
+                </div>
+                <span onClick={() => togglePasswordVisibility('current')} className="cursor-pointer">
+                  {passwordType.current ? (
+                    <FontAwesomeIcon className="text-gray-400 text-lg" icon={faEye} />
+                  ) : (
+                    <FontAwesomeIcon className="text-gray-400 text-lg" icon={faEyeSlash} />
+                  )}
+                </span>
+              </div>
+              {errors.currentPassword && <p className="text-red-600">{errors.currentPassword.message}</p>}
+            </div>
+
             {/* New Password */}
             <div className="mt-4">
               <div className="flex items-center p-2 md:p-4 justify-between gap-3 w-full rounded-xl border-2">
@@ -162,7 +152,7 @@ function ChangePassword() {
                     type={passwordType.confirm ? 'text' : 'password'}
                     {...register('confirmPassword', {
                       required: 'Please confirm your new password',
-                      validate: (value) => value === newPassword || 'Passwords do not match',
+                      validate: value => value === newPassword || 'Passwords do not match',
                     })}
                     className="outline-none w-full"
                     placeholder="Confirm New Password"
@@ -180,8 +170,8 @@ function ChangePassword() {
             </div>
 
             <div className="mt-4">
-              <button
-                type="submit"
+              <button 
+                type="submit" 
                 className="text-white bg-customOrange w-full h-11 lg:h-14 rounded-lg cursor-pointer hover:bg-orange-600 transition-colors"
               >
                 Change Password

@@ -153,6 +153,7 @@ function GlobalState({ children }) {
   };
 
   const upDatePage = (ComponentName) => {
+    console.log('Updating active component to:', ComponentName);
     localStorage.setItem('components', JSON.stringify(ComponentName));
     setActiveComponent(ComponentName);
     setToggleState(false);

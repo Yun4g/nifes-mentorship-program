@@ -7,6 +7,7 @@ import { faTwitter, faFacebook, faWhatsapp, faInstagram, faLinkedin } from '@for
 import EditProfile from './EditProfile';
 import { useContext } from 'react';
 import { GlobalContext } from '@/component/GlobalStore/GlobalState';
+import { useAuth } from '@/lib/AuthContext'; // Import useAuth
 
 // Add icons to the library
 library.add(faBars, faRemove, faTwitter, faFacebook, faWhatsapp, faInstagram, faLinkedin);
@@ -25,11 +26,19 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const { profile, setProfile } = useContext(GlobalContext);
+  const { token } = useAuth(); // Get token from useAuth
 
   const fetchProfile = async () => {
     try {
       setIsLoading(true);
       setError(null);
+
+      const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+      console.log('Token:', token); // Debug: Log the token to verify its value
+
+      if (!token) {
+        throw new Error('Authentication token is missing. Please log in again.');
+      }
 
       const apiUrl = `${import.meta.env.VITE_API_URL}/users/profile`;
       console.log('Fetching profile from API:', apiUrl); // Log the API URL
@@ -37,7 +46,7 @@ const Profile = () => {
       const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`, // Use token from localStorage
           'Content-Type': 'application/json'
         }
       });
@@ -59,11 +68,10 @@ const Profile = () => {
 
   const handleProfileUpdate = async (updatedProfile) => {
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`${import.meta.env.VITE_API_URL}/users/profile`, { // Corrected URL
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`, // Use token from useAuth
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(updatedProfile),

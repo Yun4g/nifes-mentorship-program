@@ -4,24 +4,24 @@ import { faLongArrowRight, faBars } from "@fortawesome/free-solid-svg-icons";
 import { Calendar } from "@/components/ui/calendar";
 import { GlobalContext } from "@/component/GlobalStore/GlobalState";
 import { userApi } from '../../../lib/api';
-import { useAuth } from '../../../lib/AuthContext';
+import { useAuth } from '@/lib/AuthContext'; // Import useAuth
 
 function Overview() {
   const [stats, setStats] = useState(null);
   const [userData, setUserData] = useState(null);
-  const { user } = useAuth();
+  const { user, token } = useAuth(); // Get token from useAuth
   const { upDatePage, handleToggleState, acceptedMentors } = useContext(GlobalContext);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch user profile data
-        const profileResponse = await userApi.getProfile();
+        const profileResponse = await userApi.getProfile(token); // Pass token to API
         setUserData(profileResponse.data);
         console.log('Fetched user data:', profileResponse.data);
 
         // Fetch user stats
-        const statsResponse = await userApi.getStats();
+        const statsResponse = await userApi.getStats(token); // Pass token to API
         setStats(statsResponse.data);
         console.log('Fetched stats:', statsResponse.data);
       } catch (error) {
@@ -32,7 +32,7 @@ function Overview() {
     if (user?.role === 'mentee') {
       fetchData();
     }
-  }, [user?.role]);
+  }, [user?.role, token]);
 
   // Calculate profile completion percentage based on User model fields
   const calculateProfileStrength = () => {
@@ -242,4 +242,4 @@ function Overview() {
   );
 }
 
-export default Overview; 
+export default Overview;
